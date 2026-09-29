@@ -58,20 +58,6 @@ Conté dues parts:
 └── README.md
 ```
 
-## Fotografies de l'equip
-
-Pugeu les fotografies a la carpeta [`assets/img/equip/`](assets/img/equip/) amb aquests noms
-exactes (en minúscules):
-
-| Integrant | Fitxer |
-|-----------|--------|
-| Razvan Nastasa Ghitau | `assets/img/equip/razvan.jpg` |
-| Lluc Sarrà Masdeu | `assets/img/equip/lluc.jpg` |
-| Mouhammed Oualy | `assets/img/equip/mouhammed.jpg` |
-
-Es recomana una imatge quadrada d'uns 600 × 600 px. També s'accepten `.jpeg`, `.png` i `.webp`
-amb el mateix nom. Mentre no hi hagi fotografia, la web mostra les inicials.
-
 ## Publicar la web amb GitHub Pages
 
 1. Creeu un repositori nou a GitHub (per exemple, `argos-cyber-defense`) i pugeu-hi tot el
