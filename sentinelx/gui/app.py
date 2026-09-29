@@ -11,7 +11,8 @@ from gui.tabs.network_tab import NetworkTab
 from gui.tabs.report_tab import ReportTab
 from gui.tabs.system_tab import SystemTab
 from gui.tabs.vuln_tab import VulnTab
-from gui.theme import APP_NAME, COLOR_PRIMARY_DARK, COMPANY_NAME, apply_theme
+from gui.theme import APP_NAME, COMPANY_NAME, apply_theme
+from gui.theme import COLOR_ACCENT, COLOR_BACKGROUND, COLOR_HEADER, FONT_DISPLAY_FAMILY
 from gui.theme import LOGO_ICON_ICO, LOGO_ICON_PNG, LOGO_SYMBOL_DARK, load_logo
 from gui.widgets.dependency_dialog import DependencyDialog
 from utils.resources import resource_path
@@ -23,6 +24,7 @@ class SentinelXApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         apply_theme()
+        self.configure(fg_color=COLOR_BACKGROUND)
         self.title(f"{APP_NAME} — {COMPANY_NAME}")
         self.geometry("1200x760")
         self.minsize(1000, 640)
@@ -35,18 +37,20 @@ class SentinelXApp(ctk.CTk):
         self.after(300, self._show_dependency_check)
 
     def _build_header(self):
-        header = ctk.CTkFrame(self, height=56, fg_color=COLOR_PRIMARY_DARK, corner_radius=0)
+        header = ctk.CTkFrame(self, height=60, fg_color=COLOR_HEADER, corner_radius=0)
         header.pack(fill="x", side="top")
         header.pack_propagate(False)
         logo = load_logo(LOGO_SYMBOL_DARK, size=(46, 46))
         if logo:
             ctk.CTkLabel(header, text="", image=logo).pack(side="left", padx=(16, 0))
-        ctk.CTkLabel(header, text=f"  {APP_NAME}", font=("Segoe UI", 18, "bold"), text_color="white").pack(
-            side="left", padx=16
-        )
-        ctk.CTkLabel(header, text=f"{COMPANY_NAME}  ", font=("Segoe UI", 12), text_color="#9FB3C8").pack(
-            side="right", padx=16
-        )
+        ctk.CTkLabel(
+            header, text=f" {APP_NAME}", font=(FONT_DISPLAY_FAMILY, 19, "bold"), text_color="white"
+        ).pack(side="left", padx=(8, 16))
+        ctk.CTkLabel(
+            header, text=f"{COMPANY_NAME.upper()}  ", font=(FONT_DISPLAY_FAMILY, 12, "bold"), text_color=COLOR_ACCENT
+        ).pack(side="right", padx=16)
+        # Línia d'accent en cian sota la capçalera, com a la web corporativa
+        ctk.CTkFrame(self, height=3, fg_color=COLOR_ACCENT, corner_radius=0).pack(fill="x", side="top")
 
     def _set_window_icon(self):
         """Icona de la finestra i de la barra de tasques amb el símbol d'Argos."""
@@ -60,8 +64,10 @@ class SentinelXApp(ctk.CTk):
             pass  # si falta el fitxer, es manté la icona per defecte
 
     def _build_tabs(self):
-        self.tabview = ctk.CTkTabview(self, command=self._on_tab_changed)
-        self.tabview.pack(fill="both", expand=True, padx=8, pady=8)
+        self.tabview = ctk.CTkTabview(
+            self, command=self._on_tab_changed, anchor="nw", fg_color=COLOR_BACKGROUND,
+        )
+        self.tabview.pack(fill="both", expand=True, padx=12, pady=(10, 8))
 
         tab_dashboard = self.tabview.add(TAB_DASHBOARD)
         tab_network = self.tabview.add("Auditoria de Xarxa")

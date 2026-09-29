@@ -58,6 +58,33 @@ Conté dues parts:
 └── README.md
 ```
 
+## Fotografies de l'equip
+
+Pugeu les fotografies a la carpeta [`assets/img/equip/`](assets/img/equip/) amb aquests noms
+exactes (en minúscules):
+
+| Integrant | Fitxer |
+|-----------|--------|
+| Razvan Nastasa Ghitau | `assets/img/equip/razvan.jpg` |
+| Lluc Sarrà Masdeu | `assets/img/equip/lluc.jpg` |
+| Mouhammed Oualy | `assets/img/equip/mouhammed.jpg` |
+
+Es recomana una imatge quadrada d'uns 600 × 600 px. També s'accepten `.jpeg`, `.png` i `.webp`
+amb el mateix nom. Mentre no hi hagi fotografia, la web mostra les inicials.
+
+## Publicar la web amb GitHub Pages
+
+1. Creeu un repositori nou a GitHub (per exemple, `argos-cyber-defense`) i pugeu-hi tot el
+   contingut d'aquesta carpeta (**Add file → Upload files**).
+2. Aneu a **Settings → Pages**.
+3. A **Build and deployment → Source**, trieu **Deploy from a branch**.
+4. Seleccioneu la branca **`main`** i la carpeta **`/ (root)`** i premeu **Save**.
+5. Al cap d'un o dos minuts, la web estarà disponible a
+   `https://<usuari>.github.io/<repositori>/`.
+
+Els enllaços de la web cap al codi font de GitHub es generen automàticament a partir d'aquesta
+adreça, no cal editar res.
+
 ## SentinelX Audit Suite
 
 Aplicació d'escriptori en Python (CustomTkinter) per fer auditories de seguretat: descobriment
@@ -82,11 +109,24 @@ Tota la documentació és a [`sentinelx/README.md`](sentinelx/README.md) i
 > als quals es disposi d'autorització expressa i per escrit. L'ús no autoritzat sobre sistemes
 > de tercers pot constituir un delicte.
 
+## Formulari de sol·licitud d'auditoria
+
+Els botons **Sol·licita una auditoria** obren un formulari. Les respostes s'envien per correu
+electrònic a `llucsarra@iesebre.com` a través de [FormSubmit](https://formsubmit.co), un servei
+gratuït que no necessita compte ni servidor propi.
+
+- La **primera vegada** que s'envia el formulari des de la web publicada, FormSubmit envia un
+  correu de confirmació a aquesta adreça: cal obrir-lo i prémer **Activate Form**. A partir
+  d'aquí, cada sol·licitud arriba com un correu amb totes les dades en una taula.
+- Per canviar el correu de destinació, modifiqueu els atributs `action` i `data-contact` del
+  formulari a `index.html`.
+
 ## Seguretat de la web
 
 La landing page és completament estàtica i no carrega cap recurs extern: no hi ha galetes,
 analítiques, tipus de lletra ni scripts de tercers. Inclou una política de seguretat de
-contingut (*Content Security Policy*) que només permet carregar recursos del mateix domini.
+contingut (*Content Security Policy*) que només permet carregar recursos del mateix domini;
+l'única connexió externa permesa és l'enviament del formulari a FormSubmit.
 
 ## Llicència
 

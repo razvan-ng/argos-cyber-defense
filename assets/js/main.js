@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initTeamPhotos();
   initRepoLinks();
   initCopyButtons();
+  initAuditForm();
 });
 
 /* Capçalera: canvia d'aspecte quan es fa scroll */
@@ -161,6 +162,104 @@ function initCopyButtons() {
       });
     });
   });
+}
+
+/* Formulari de sol·licitud d'auditoria.
+   S'obre com a finestra modal des de qualsevol botó amb data-open-form i s'envia
+   per AJAX a FormSubmit, que fa arribar les respostes per correu electrònic.
+   Sense JavaScript, els botons continuen funcionant com a enllaços normals. */
+function initAuditForm() {
+  var dialog = document.getElementById("formulari-auditoria");
+  var form = document.getElementById("form-auditoria");
+  if (!dialog || !form || typeof dialog.showModal !== "function") return;
+
+  var done = dialog.querySelector(".form-done");
+  var status = form.querySelector(".form-status");
+  var submitBtn = form.querySelector('button[type="submit"]');
+  var submitLabel = submitBtn.querySelector("span");
+  var contactEmail = form.getAttribute("data-contact");
+
+  var setStatus = function (text, isError) {
+    status.textContent = text || "";
+    status.classList.toggle("is-error", !!isError);
+  };
+
+  var reset = function () {
+    form.hidden = false;
+    done.hidden = true;
+    setStatus("");
+  };
+
+  var open = function () {
+    if (!done.hidden) { form.reset(); reset(); }
+    dialog.showModal();
+    document.documentElement.classList.add("modal-open");
+  };
+
+  var close = function () { dialog.close(); };
+
+  document.querySelectorAll("[data-open-form]").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      e.preventDefault();
+      open();
+    });
+  });
+  dialog.querySelectorAll("[data-close-form]").forEach(function (el) {
+    el.addEventListener("click", close);
+  });
+  // Clic fora del panell (sobre el fons fosc) per tancar
+  dialog.addEventListener("click", function (e) {
+    if (e.target === dialog) close();
+  });
+  dialog.addEventListener("close", function () {
+    document.documentElement.classList.remove("modal-open");
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var data = {};
+    new FormData(form).forEach(function (value, key) { data[key] = value; });
+    if (data._honey) return; // camp parany omplert: probablement un robot
+
+    submitBtn.disabled = true;
+    submitLabel.textContent = "Enviant...";
+    setStatus("");
+
+    var endpoint = form.action.replace("formsubmit.co/", "formsubmit.co/ajax/");
+    fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(data)
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (result) {
+        if (result.success === true || result.success === "true") {
+          dialog.querySelector(".form-done__email").textContent = data.email;
+          form.hidden = true;
+          done.hidden = false;
+          form.reset();
+        } else {
+          showSendError(result.message);
+        }
+      })
+      .catch(function () { showSendError(); })
+      .then(function () {
+        submitBtn.disabled = false;
+        submitLabel.textContent = "Envia la sol·licitud";
+      });
+  });
+
+  function showSendError(detail) {
+    setStatus("", true);
+    status.appendChild(document.createTextNode(
+      "No s'ha pogut enviar la sol·licitud" + (detail ? " (" + detail + ")" : "") + ". Torneu-ho a provar o escriviu-nos a "
+    ));
+    var link = document.createElement("a");
+    link.href = "mailto:" + contactEmail;
+    link.textContent = contactEmail;
+    status.appendChild(link);
+    status.appendChild(document.createTextNode("."));
+  }
 }
 
 function copyText(text) {

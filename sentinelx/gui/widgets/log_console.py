@@ -3,12 +3,15 @@ import datetime
 
 import customtkinter as ctk
 
+from gui.theme import COLOR_CONSOLE, COLOR_CONSOLE_TEXT, FONT_MONO_FAMILY
+
 
 class LogConsole(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
+        kwargs.setdefault("fg_color", COLOR_CONSOLE)
         super().__init__(master, **kwargs)
         self.textbox = ctk.CTkTextbox(
-            self, wrap="word", font=("Consolas", 11), fg_color="#0D1117", text_color="#D6E2E9"
+            self, wrap="word", font=(FONT_MONO_FAMILY, 11), fg_color=COLOR_CONSOLE, text_color=COLOR_CONSOLE_TEXT
         )
         self.textbox.pack(fill="both", expand=True, padx=4, pady=4)
         self.textbox.configure(state="disabled")
