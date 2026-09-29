@@ -58,33 +58,6 @@ Conté dues parts:
 └── README.md
 ```
 
-## Fotografies de l'equip
-
-Pugeu les fotografies a la carpeta [`assets/img/equip/`](assets/img/equip/) amb aquests noms
-exactes (en minúscules):
-
-| Integrant | Fitxer |
-|-----------|--------|
-| Razvan Nastasa Ghitau | `assets/img/equip/razvan.jpg` |
-| Lluc Sarrà Masdeu | `assets/img/equip/lluc.jpg` |
-| Mouhammed Oualy | `assets/img/equip/mouhammed.jpg` |
-
-Es recomana una imatge quadrada d'uns 600 × 600 px. També s'accepten `.jpeg`, `.png` i `.webp`
-amb el mateix nom. Mentre no hi hagi fotografia, la web mostra les inicials.
-
-## Publicar la web amb GitHub Pages
-
-1. Creeu un repositori nou a GitHub (per exemple, `argos-cyber-defense`) i pugeu-hi tot el
-   contingut d'aquesta carpeta (**Add file → Upload files**).
-2. Aneu a **Settings → Pages**.
-3. A **Build and deployment → Source**, trieu **Deploy from a branch**.
-4. Seleccioneu la branca **`main`** i la carpeta **`/ (root)`** i premeu **Save**.
-5. Al cap d'un o dos minuts, la web estarà disponible a
-   `https://<usuari>.github.io/<repositori>/`.
-
-Els enllaços de la web cap al codi font de GitHub es generen automàticament a partir d'aquesta
-adreça, no cal editar res.
-
 ## SentinelX Audit Suite
 
 Aplicació d'escriptori en Python (CustomTkinter) per fer auditories de seguretat: descobriment
