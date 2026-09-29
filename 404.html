@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Pàgina autocontinguda: GitHub Pages la serveix des de qualsevol ruta inexistent -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0B1F3A">
+  <title>Pàgina no trobada · Argos Cyber Defense</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px 16px;
+      background: radial-gradient(700px 480px at 50% 30%, rgba(22, 180, 210, 0.16), transparent 70%), #0B1F3A;
+      color: #E8EFF6;
+      font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Roboto, Arial, sans-serif;
+      text-align: center;
+    }
+    main { max-width: 560px; }
+    svg { width: 110px; height: auto; margin-bottom: 24px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      font-family: "Bahnschrift", "DIN Alternate", "Segoe UI", sans-serif;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #16B4D2;
+    }
+    h1 {
+      margin: 0 0 16px;
+      font-family: "Bahnschrift", "DIN Alternate", "Segoe UI", sans-serif;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      line-height: 1.1;
+      color: #fff;
+    }
+    p { color: #A7BBD0; line-height: 1.6; }
+    a {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 0.85em 1.5em;
+      border-radius: 999px;
+      background: #16B4D2;
+      color: #0B1F3A;
+      font-family: "Bahnschrift", "DIN Alternate", "Segoe UI", sans-serif;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    a:hover { background: #3CC6DF; }
+    a:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="8 2 184 228" aria-hidden="true">
+      <path d="M100 80.5C74.5 80.5 49 91 36 112 62 154 138 154 164 112 151 91 125.5 80.5 100 80.5ZM100 7.29C102.52 7.29 105.05 7.72 107.57 8.58L180.43 33.42C185.48 35.14 188 38.67 188 44L188 118C188 172 152 206 100 226 48 206 12 172 12 118L12 44C12 38.67 14.52 35.14 19.57 33.42L92.43 8.58C94.95 7.72 97.48 7.29 100 7.29Z" fill="#FFFFFF"/>
+      <path d="M100 7.29C102.52 7.29 105.05 7.72 107.57 8.58L180.43 33.42C185.48 35.14 188 38.67 188 44L188 118C188 172 152 206 100 226L100 143.5C125.5 143.5 151 133 164 112 151 91 125.5 80.5 100 80.5L100 7.29Z" fill="#D5E2EE"/>
+      <path d="M100 94C90.06 94 82 102.06 82 112 82 121.94 90.06 130 100 130C109.94 130 118 121.94 118 112C118 102.06 109.94 94 100 94ZM100 86C114.36 86 126 97.64 126 112C126 126.36 114.36 138 100 138 85.64 138 74 126.36 74 112 74 97.64 85.64 86 100 86Z" fill="#16B4D2"/>
+      <path d="M98 132L102 132 102 142 98 142 98 132ZM120 110L130 110 130 114 120 114 120 110ZM70 110L80 110 80 114 70 114 70 110ZM98 82L102 82 102 92 98 92 98 82Z" fill="#16B4D2"/>
+      <path d="M100 101C106.08 101 111 105.92 111 112C111 118.08 106.08 123 100 123 93.92 123 89 118.08 89 112C89 110.48 89.31 109.03 89.86 107.72L89.98 107.55 90.17 107.83C90.9 108.55 91.9 109 93 109C95.21 109 97 107.21 97 105 97 103.9 96.55 102.9 95.83 102.17L95.55 101.98 95.72 101.86C97.03 101.31 98.48 101 100 101Z" fill="#FFFFFF"/>
+    </svg>
+    <p class="eyebrow">Error 404</p>
+    <h1>Aquesta pàgina no és al nostre radar</h1>
+    <p>L'adreça que busqueu no existeix o s'ha mogut. Torneu a l'inici per continuar navegant.</p>
+    <a id="inici" href="/">Torna a l'inici</a>
+  </main>
+  <script>
+    // En una web de projecte (usuari.github.io/repositori/) l'inici és /repositori/
+    (function () {
+      var host = location.hostname;
+      var first = location.pathname.split("/").filter(Boolean)[0];
+      if (/\.github\.io$/i.test(host) && first && first.toLowerCase() !== host.toLowerCase()) {
+        document.getElementById("inici").href = "/" + first + "/";
+      }
+    })();
+  </script>
+</body>
+</html>

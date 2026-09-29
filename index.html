@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Política de seguretat de contingut: només es carreguen recursos del mateix domini -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' mailto:">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Argos Cyber Defense · Auditoria de seguretat informàtica</title>
+  <meta name="description" content="Argos Cyber Defense: auditories de seguretat de xarxes i sistemes, escaneig de vulnerabilitats amb SentinelX, informe i pla de millora. Projecte intermodular de 2n d'ASIX (ciberseguretat).">
+  <meta name="theme-color" content="#0B1F3A">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Argos Cyber Defense · Auditoria de seguretat informàtica">
+  <meta property="og:description" content="Detectem, analitzem i prevenim les vulnerabilitats de la vostra infraestructura.">
+  <meta property="og:image" content="assets/img/logo/argos-avatar_800px.png">
+  <meta property="og:locale" content="ca_ES">
+
+  <link rel="icon" href="assets/img/favicon/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/main.js"></script>
+</head>
+<body>
+
+  <!-- Icones (sprite SVG) -->
+  <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/></symbol>
+    <symbol id="i-network" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="16" y="16" width="6" height="6" rx="1"/><path d="M12 8v4M5 16v-4h14v4"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01M10 7h8M10 17h8"/></symbol>
+    <symbol id="i-radar" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="5.5"/><path d="M12 12l6.7-6.7"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-report" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-retest" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/><path d="M8 12l3 3 5-6"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-signed" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></symbol>
+    <symbol id="i-privacy" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="10" r="2.5"/><path d="M8.5 16.5a4 4 0 0 1 7 0"/></symbol>
+    <symbol id="i-shred" viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><path d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86z"/><path d="M10 9v6M14 9v6"/></symbol>
+    <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-sprint" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/><path d="M12 8v4l3 2"/></symbol>
+    <symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M5.5 7h2M11.5 7h1.5M11.5 10h1.5M17 7h2"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#contingut">Salta al contingut</a>
+
+  <!-- ============ CAPÇALERA ============ -->
+  <header class="site-header" id="capcalera">
+    <div class="container site-header__inner">
+      <a class="brand" href="#inici" aria-label="Argos Cyber Defense, inici">
+        <img src="assets/img/logo/argos-logo-horitzontal-negatiu.svg" alt="Argos Cyber Defense" width="150" height="54">
+      </a>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="menu-principal">
+        <svg class="icon icon--open" aria-hidden="true"><use href="#i-menu"/></svg>
+        <svg class="icon icon--close" aria-hidden="true"><use href="#i-close"/></svg>
+        <span class="visually-hidden">Obre o tanca el menú</span>
+      </button>
+
+      <nav class="site-nav" id="menu-principal" aria-label="Menú principal">
+        <ul>
+          <li><a href="#qui-som">Qui som</a></li>
+          <li><a href="#serveis">Serveis</a></li>
+          <li><a href="#sentinelx">SentinelX</a></li>
+          <li><a href="#metodologia">Metodologia</a></li>
+          <li><a href="#equip">Equip</a></li>
+          <li><a href="#contacte">Contacte</a></li>
+        </ul>
+        <a class="btn btn--primary btn--sm" href="#contacte">Sol·licita una auditoria</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contingut">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="inici">
+      <div class="hero__grid-bg" aria-hidden="true"></div>
+      <div class="container hero__inner">
+        <div class="hero__copy">
+          <p class="chip"><span class="chip__dot" aria-hidden="true"></span>Especialistes en auditoria de seguretat informàtica</p>
+          <h1>Veiem les vulnerabilitats <span class="accent">abans que els atacants.</span></h1>
+          <p class="hero__lead">Auditem la infraestructura de xarxa i els sistemes de la vostra empresa amb <strong>SentinelX</strong>, la nostra pròpia eina d'auditoria, i us lliurem un informe clar i un pla de millora prioritzat per tancar cada bretxa.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#contacte">Sol·licita una auditoria <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="btn btn--ghost" href="#sentinelx">Descobreix SentinelX</a>
+          </div>
+          <dl class="hero__facts">
+            <div><dt>SentinelX</dt><dd>Eina d'auditoria pròpia</dd></div>
+            <div><dt>CVSS v4.0</dt><dd>Puntuació de cada troballa</dd></div>
+            <div><dt>&le; 2 h</dt><dd>Avís de vulnerabilitats crítiques</dd></div>
+          </dl>
+        </div>
+
+        <div class="hero__visual" aria-hidden="true">
+          <div class="radar">
+            <span class="radar__ring radar__ring--1"></span>
+            <span class="radar__ring radar__ring--2"></span>
+            <span class="radar__ring radar__ring--3"></span>
+            <span class="radar__axis radar__axis--h"></span>
+            <span class="radar__axis radar__axis--v"></span>
+            <span class="radar__sweep"></span>
+            <span class="radar__eye"></span><span class="radar__eye"></span><span class="radar__eye"></span>
+            <span class="radar__eye"></span><span class="radar__eye"></span><span class="radar__eye"></span>
+            <span class="radar__eye"></span><span class="radar__eye"></span><span class="radar__eye"></span>
+            <span class="radar__eye"></span>
+            <img class="radar__symbol" src="assets/img/logo/argos-simbol-negatiu.svg" alt="" width="184" height="228">
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <ul class="standards" aria-label="Metodologies i estàndards de referència">
+          <li>NIST SP 800-115</li>
+          <li>OSSTMM</li>
+          <li>CIS Benchmarks</li>
+          <li>CVSS v4.0</li>
+          <li>ISO/IEC 27002:2022</li>
+          <li>RGPD · LOPDGDD</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ QUI SOM ============ -->
+    <section class="section" id="qui-som">
+      <div class="container about">
+        <div class="about__text reveal">
+          <p class="eyebrow">Qui som</p>
+          <h2>Cent ulls vigilant la vostra infraestructura</h2>
+          <p class="lead">El nostre nom ve d'<strong>Argos Panoptes</strong>, el gegant de la mitologia grega que tenia cent ulls i que mai no deixava de vigilar.</p>
+          <p>Argos Cyber Defense és una empresa especialitzada exclusivament en auditories de seguretat informàtica. Analitzem xarxes i sistemes, detectem les vulnerabilitats i us ajudem a corregir-les abans que es converteixin en un incident: una fuita de dades, una aturada del servei o un atac.</p>
+          <p>Ho fem amb un equip qualificat, amb metodologia àgil i amb una eina desenvolupada per nosaltres mateixos, <strong>SentinelX</strong>, que ens permet cobrir tot el cicle d'una auditoria tècnica.</p>
+          <dl class="facts">
+            <div><dt>Seu</dt><dd>Barcelona</dd></div>
+            <div><dt>Especialitat</dt><dd>Auditoria de seguretat</dd></div>
+            <div><dt>Metodologia</dt><dd>SCRUM · sprints de 2 setmanes</dd></div>
+            <div><dt>Eina</dt><dd>SentinelX (Python)</dd></div>
+          </dl>
+        </div>
+
+        <div class="about__pillars">
+          <p class="pillars__intro reveal">El nostre símbol resumeix com treballem:</p>
+          <article class="pillar reveal">
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span>
+            <div>
+              <h3>L'escut</h3>
+              <p>La protecció dels actius i de les dades dels vostres clients. El vèrtex superior recorda la «A» d'Argos.</p>
+            </div>
+          </article>
+          <article class="pillar reveal">
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg></span>
+            <div>
+              <h3>L'ull</h3>
+              <p>La vigilància constant i la detecció de les vulnerabilitats abans que ho facin els atacants.</p>
+            </div>
+          </article>
+          <article class="pillar reveal">
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-target"/></svg></span>
+            <div>
+              <h3>La mira</h3>
+              <p>La precisió de l'anàlisi i de l'escaneig que fem amb SentinelX, sense soroll ni falsos positius.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SERVEIS ============ -->
+    <section class="section section--mist" id="serveis">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="eyebrow">Serveis</p>
+          <h2>Tot el que cal per conèixer l'estat real de la vostra seguretat</h2>
+          <p class="lead">Des del primer escaneig fins a la verificació final, us acompanyem en cada pas amb evidències, prioritats clares i solucions pràctiques.</p>
+        </header>
+
+        <div class="cards">
+          <article class="card reveal">
+            <span class="card__num">01</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-network"/></svg></span>
+            <h3>Auditoria de xarxa</h3>
+            <p>Revisió de tallafocs, segmentació VLAN, protocols de gestió, xarxa sense fil i VPN. Comprovem la redundància i la commutació per error de les arquitectures d'alta disponibilitat.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__num">02</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg></span>
+            <h3>Auditoria de sistemes</h3>
+            <p>Bastionat segons els CIS Benchmarks, polítiques de comptes i contrasenyes del directori actiu, nivell d'actualització dels equips i estat de les còpies de seguretat.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__num">03</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-radar"/></svg></span>
+            <h3>Escaneig de vulnerabilitats</h3>
+            <p>Escaneig autenticat i no autenticat amb SentinelX, correlació dels serveis detectats amb CVE conegudes i puntuació de cada troballa amb CVSS v4.0.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__num">04</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-report"/></svg></span>
+            <h3>Informe i pla de millora</h3>
+            <p>Resum executiu per a la direcció, informe tècnic amb evidències i un full de ruta prioritzat a 30, 90 i 180 dies, alineat amb la ISO/IEC 27002:2022.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__num">05</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-retest"/></svg></span>
+            <h3>Verificació posterior</h3>
+            <p>Un cop aplicades les correccions, tornem a comprovar les vulnerabilitats crítiques i altes (re-test) perquè tingueu la certesa que la bretxa s'ha tancat.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__num">06</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-trend"/></svg></span>
+            <h3>Seguiment periòdic</h3>
+            <p>Escaneigs trimestrals amb SentinelX i un informe de tendència per veure com evoluciona la seguretat de la vostra organització al llarg del temps.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SENTINELX ============ -->
+    <section class="section section--dark section--sentinel" id="sentinelx">
+      <div class="container">
+        <div class="sentinel">
+          <div class="sentinel__text reveal">
+            <p class="eyebrow">La nostra eina</p>
+            <h2>SentinelX Audit Suite</h2>
+            <p class="lead">Una aplicació d'escriptori desenvolupada en Python per l'equip d'Argos, amb interfície gràfica, que reuneix en un sol lloc tot el cicle d'una auditoria tècnica: <strong>descobrir, analitzar, prioritzar i informar</strong>.</p>
+
+            <ul class="modules">
+              <li><h3>Tauler</h3><p>Estat de l'auditoria d'un cop d'ull, la vista «Què cal arreglar primer?» i el Mode Segur, que demana confirmació abans de les accions més intrusives.</p></li>
+              <li><h3>Auditoria de xarxa</h3><p>Descobriment d'equips, escaneig de ports, serveis, versions i sistema operatiu amb nmap, escaneig UDP i traçat de rutes.</p></li>
+              <li><h3>Sistema local i reforçament</h3><p>Interfícies, connexions, processos, usuaris i tallafocs; detecció d'actualitzacions pendents, binaris SUID/SGID i comptes amb privilegis.</p></li>
+              <li><h3>Vulnerabilitats i CVE</h3><p>Anàlisi passiva contra un diccionari local i la API de la NVD, consulta d'exploits públics coneguts i escaneig actiu amb els scripts NSE.</p></li>
+              <li><h3>Informes</h3><p>Exportació a HTML, PDF, JSON i CSV amb resum executiu, matriu de troballes i pla de millora.</p></li>
+              <li><h3>Sessions i comparació</h3><p>Desa l'auditoria i compara-la amb una d'anterior per detectar equips, ports o vulnerabilitats nous.</p></li>
+            </ul>
+          </div>
+
+          <div class="sentinel__visual reveal">
+            <figure class="app-mock">
+              <div class="app-mock__window" role="img" aria-label="Recreació il·lustrativa de la pestanya Tauler de SentinelX amb dades de demostració">
+                <div class="app-mock__bar">
+                  <span class="app-mock__dots"><i></i><i></i><i></i></span>
+                  <span class="app-mock__title">SentinelX Audit Suite — Argos Cyber Defense</span>
+                </div>
+                <div class="app-mock__tabs">
+                  <span class="is-active">Tauler</span><span>Xarxa</span><span>Sistema</span><span>CVE</span><span>Informes</span>
+                </div>
+                <div class="app-mock__body">
+                  <div class="app-mock__stats">
+                    <div><b>24</b><small>Equips</small></div>
+                    <div><b>137</b><small>Ports oberts</small></div>
+                    <div><b>18</b><small>Troballes</small></div>
+                  </div>
+                  <div class="sevbar">
+                    <span class="sevbar__seg sevbar__seg--crit"></span>
+                    <span class="sevbar__seg sevbar__seg--high"></span>
+                    <span class="sevbar__seg sevbar__seg--med"></span>
+                    <span class="sevbar__seg sevbar__seg--low"></span>
+                  </div>
+                  <ul class="sevbar__legend">
+                    <li class="crit">Crítica 2</li><li class="high">Alta 5</li><li class="med">Mitjana 7</li><li class="low">Baixa 4</li>
+                  </ul>
+                  <p class="app-mock__heading">Què cal arreglar primer?</p>
+                  <ul class="findings">
+                    <li><span class="sev sev--crit">9.8</span><span class="findings__id">CVE-2021-41773</span><span class="findings__svc">Apache httpd 2.4.49</span><span class="findings__host">10.40.99.21:80</span></li>
+                    <li><span class="sev sev--crit">9.8</span><span class="findings__id">CVE-2011-2523</span><span class="findings__svc">vsftpd 2.3.4</span><span class="findings__host">10.40.99.34:21</span></li>
+                    <li><span class="sev sev--high">7.5</span><span class="findings__id">CVE-2012-2122</span><span class="findings__svc">MariaDB 5.5</span><span class="findings__host">10.40.99.31:3306</span></li>
+                    <li><span class="sev sev--med">5.9</span><span class="findings__id">CVE-2016-6210</span><span class="findings__svc">OpenSSH 7.2</span><span class="findings__host">10.40.99.12:22</span></li>
+                  </ul>
+                  <p class="app-mock__safe"><span aria-hidden="true"></span>Mode Segur activat</p>
+                </div>
+              </div>
+              <figcaption>Recreació il·lustrativa del Tauler amb dades de demostració.</figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <ul class="tech" aria-label="Tecnologies de SentinelX">
+          <li>Python 3.10+</li><li>CustomTkinter</li><li>nmap · NSE</li><li>psutil</li><li>NVD API</li><li>Exploit-DB</li><li>ReportLab</li><li>PyInstaller</li>
+        </ul>
+
+        <div class="get reveal">
+          <div class="get__info">
+            <h3>Prova SentinelX</h3>
+            <p>Pensada per a Ubuntu 24.04 / 26.04 LTS. L'script d'instal·lació prepara les eines del sistema, l'entorn virtual i totes les dependències en un sol pas.</p>
+            <div class="get__actions">
+              <a class="btn btn--primary" href="descarregues/sentinelx-audit-suite-v1.0.0.zip" download>
+                <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Descarrega la v1.0.0 (.zip)
+              </a>
+              <a class="btn btn--ghost" href="sentinelx/README.md" data-repo-path="tree/main/sentinelx">
+                <svg class="icon" aria-hidden="true"><use href="#i-code"/></svg> Codi font
+              </a>
+            </div>
+          </div>
+          <div class="terminal">
+            <div class="terminal__bar">
+              <span>bash</span>
+              <button class="copy-btn" type="button" data-copy-target="codi-inici">
+                <svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg><span>Copia</span>
+              </button>
+            </div>
+<pre id="codi-inici"><code>chmod +x install_dependencies.sh
+./install_dependencies.sh
+source venv/bin/activate
+python main.py</code></pre>
+          </div>
+        </div>
+
+        <p class="notice">
+          <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
+          <span><strong>Avís legal i ètic:</strong> SentinelX s'ha d'utilitzar exclusivament sobre xarxes i sistemes per als quals es disposi d'autorització expressa i per escrit. L'ús no autoritzat sobre sistemes de tercers pot constituir un delicte.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ METODOLOGIA ============ -->
+    <section class="section" id="metodologia">
+      <div class="container method">
+        <div class="method__intro reveal">
+          <p class="eyebrow">Metodologia</p>
+          <h2>Una auditoria en set fases, sense sorpreses</h2>
+          <p class="lead">Cada projecte segueix un procés ordenat i transparent, basat en guies de referència del sector, perquè sempre sapigueu què estem fent i per què.</p>
+
+          <div class="scrum">
+            <h3>Treballem amb SCRUM</h3>
+            <ul>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-sprint"/></svg><span><strong>Sprints de dues setmanes</strong> amb objectius i lliurables clars.</span></li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg><span><strong>Seguiment diari</strong> intern i una <em>sprint review</em> amb vosaltres al final de cada sprint.</span></li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-board"/></svg><span><strong>Tauler Kanban compartit</strong> amb accés de lectura per consultar l'estat de les tasques en tot moment.</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <ol class="timeline">
+          <li class="reveal"><span class="timeline__code">F0</span><div><h3>Planificació</h3><p>Reunió inicial, validació de l'inventari d'actius, signatura de les regles d'intervenció i verificació de les còpies de seguretat.</p></div></li>
+          <li class="reveal"><span class="timeline__code">F1</span><div><h3>Reconeixement</h3><p>Descoberta d'actius i serveis i mapatge de la xarxa i dels fluxos de comunicació amb SentinelX.</p></div></li>
+          <li class="reveal"><span class="timeline__code">F2</span><div><h3>Auditoria de xarxa</h3><p>Tallafocs, segmentació VLAN, xarxa sense fil, VPN i prova controlada de commutació per error.</p></div></li>
+          <li class="reveal"><span class="timeline__code">F3</span><div><h3>Auditoria de sistemes</h3><p>Escaneig de vulnerabilitats, revisió del bastionat, del directori actiu, de les actualitzacions i de les còpies.</p></div></li>
+          <li class="reveal"><span class="timeline__code">F4</span><div><h3>Anàlisi</h3><p>Validació manual dels resultats, eliminació de falsos positius, puntuació CVSS v4.0 i priorització per risc.</p></div></li>
+          <li class="reveal"><span class="timeline__code">F5</span><div><h3>Informe i pla de millora</h3><p>Informe preliminar, reunions per concretar necessitats, pla de millora, informe definitiu i presentació a la direcció.</p></div></li>
+          <li class="reveal"><span class="timeline__code">F6</span><div><h3>Verificació posterior</h3><p>Re-test de les vulnerabilitats crítiques i altes que s'hagin corregit.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ COMPROMISOS ============ -->
+    <section class="section section--dark section--commit" id="compromisos">
+      <div class="container">
+        <header class="section-head section-head--center reveal">
+          <p class="eyebrow">Compromisos</p>
+          <h2>La confiança també es mesura</h2>
+          <p class="lead">Treballem amb indicadors de nivell de servei concrets i amb regles estrictes de seguretat i privacitat.</p>
+        </header>
+
+        <dl class="kpis reveal">
+          <div><dt>&le; 2 h</dt><dd>per notificar-vos una vulnerabilitat crítica des que la detectem</dd></div>
+          <div><dt>&le; 15 min</dt><dd>per aturar les proves davant de qualsevol afectació del servei</dd></div>
+          <div><dt>&le; 4 h</dt><dd>per respondre les vostres consultes en horari laborable</dd></div>
+          <div><dt>&le; 5 %</dt><dd>de falsos positius com a màxim a l'informe definitiu</dd></div>
+        </dl>
+
+        <div class="principles">
+          <article class="principle reveal">
+            <svg class="icon" aria-hidden="true"><use href="#i-signed"/></svg>
+            <h3>Només amb autorització per escrit</h3>
+            <p>Abast, adreces i finestres d'intervenció pactades i signades abans de començar. Mai no en sortim.</p>
+          </article>
+          <article class="principle reveal">
+            <svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg>
+            <h3>Aturada immediata</h3>
+            <p>Qualsevol de les parts pot aturar les proves en qualsevol moment amb la paraula clau acordada.</p>
+          </article>
+          <article class="principle reveal">
+            <svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>
+            <h3>Evidències xifrades</h3>
+            <p>Xifratge AES-256 en repòs i TLS 1.2 o superior en trànsit, sempre en equips ubicats a la Unió Europea.</p>
+          </article>
+          <article class="principle reveal">
+            <svg class="icon" aria-hidden="true"><use href="#i-privacy"/></svg>
+            <h3>Privacitat per disseny</h3>
+            <p>Complim el RGPD i la LOPDGDD i apliquem la minimització: només l'evidència imprescindible, emmascarada.</p>
+          </article>
+          <article class="principle reveal">
+            <svg class="icon" aria-hidden="true"><use href="#i-laptop"/></svg>
+            <h3>Sense programari permanent</h3>
+            <p>SentinelX s'executa des dels nostres equips. No instal·lem res de manera permanent als vostres sistemes.</p>
+          </article>
+          <article class="principle reveal">
+            <svg class="icon" aria-hidden="true"><use href="#i-shred"/></svg>
+            <h3>Destrucció certificada</h3>
+            <p>En acabar, destruïm de manera segura totes les evidències i us en lliurem el certificat.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EQUIP ============ -->
+    <section class="section section--mist" id="equip">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="eyebrow">Equip</p>
+          <h2>Les persones darrere d'Argos</h2>
+          <p class="lead">Som tres estudiants del CFGS d'Administració de Sistemes Informàtics en Xarxa, amb perfil de ciberseguretat, a l'Institut de l'Ebre de Tortosa. Argos Cyber Defense i SentinelX són el nostre projecte intermodular de 2n curs.</p>
+        </header>
+
+        <div class="team">
+          <article class="member reveal">
+            <figure class="member__photo">
+              <span class="member__initials" aria-hidden="true">RN</span>
+              <img src="assets/img/equip/razvan.jpg" data-photo="assets/img/equip/razvan" alt="Fotografia de Razvan Nastasa Ghitau" width="600" height="600" loading="lazy">
+              <span class="member__frame" aria-hidden="true"></span>
+            </figure>
+            <div class="member__body">
+              <p class="member__role">Scrum Owner</p>
+              <h3>Razvan Nastasa Ghitau</h3>
+              <p class="member__area">Direcció del projecte · Relació amb el client</p>
+              <p>Cursa el CFGS ASIX amb perfil de ciberseguretat després d'un batxillerat científic-tecnològic. Fa les pràctiques com a tècnic informàtic al Consell Comarcal del Baix Ebre, on dona suport als usuaris i gestiona comptes i permisos amb Entra ID, certificats digitals i còpies de seguretat. Li interessen els sistemes Linux i Windows Server, les xarxes i l'anàlisi de vulnerabilitats, i automatitza tasques amb Bash, PowerShell i Python. Metòdic i amb iniciativa, sempre busca la causa arrel dels problemes.</p>
+              <ul class="tags">
+                <li>Linux</li><li>Windows Server</li><li>Entra ID</li><li>Scripting</li><li>Vulnerabilitats</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="member reveal">
+            <figure class="member__photo">
+              <span class="member__initials" aria-hidden="true">LS</span>
+              <img src="assets/img/equip/lluc.jpg" data-photo="assets/img/equip/lluc" alt="Fotografia de Lluc Sarrà Masdeu" width="600" height="600" loading="lazy">
+              <span class="member__frame" aria-hidden="true"></span>
+            </figure>
+            <div class="member__body">
+              <p class="member__role">Scrum Master</p>
+              <h3>Lluc Sarrà Masdeu</h3>
+              <p class="member__area">Auditoria de xarxes</p>
+              <p>Cursa el CFGS ASIX a l'Institut de l'Ebre, on es forma en administració de xarxes, sistemes operatius, bases de dades, ciberseguretat i hacking ètic. Abans va treballar com a tècnic informàtic a MAPEI (Amposta), diagnosticant, reparant i mantenint equips, instal·lant sistemes i programari i assessorant els clients. Organitzat, puntual i comunicatiu, és qui manté l'equip coordinat i marca el ritme de cada sprint.</p>
+              <ul class="tags">
+                <li>Xarxes</li><li>Maquinari</li><li>Sistemes operatius</li><li>Hacking ètic</li><li>Suport tècnic</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="member reveal">
+            <figure class="member__photo">
+              <span class="member__initials" aria-hidden="true">MO</span>
+              <img src="assets/img/equip/mouhammed.jpg" data-photo="assets/img/equip/mouhammed" alt="Fotografia de Mouhammed Oualy" width="600" height="600" loading="lazy">
+              <span class="member__frame" aria-hidden="true"></span>
+            </figure>
+            <div class="member__body">
+              <p class="member__role">Scrum Manager</p>
+              <h3>Mouhammed Oualy</h3>
+              <p class="member__area">Desenvolupament de SentinelX · Auditoria de sistemes</p>
+              <p>Cursa el CFGS ASIX amb perfil de ciberseguretat. S'ha format en configuració i administració de xarxes, sistemes operatius, virtualització i bases de dades, i treballa amb Cisco Packet Tracer, Linux, Windows Server i màquines virtuals. La ciberseguretat l'ha portat cap a la detecció de vulnerabilitats i l'anàlisi de xarxes. Responsable, adaptable i amb moltes ganes d'aprendre, treballa en català, castellà i anglès.</p>
+              <ul class="tags">
+                <li>Packet Tracer</li><li>Virtualització</li><li>Linux</li><li>Windows Server</li><li>Anàlisi de xarxes</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACTE ============ -->
+    <section class="section section--dark section--contact" id="contacte">
+      <div class="container contact">
+        <div class="contact__text reveal">
+          <p class="eyebrow">Contacte</p>
+          <h2>Parlem de la seguretat de la vostra empresa</h2>
+          <p class="lead">Expliqueu-nos quina infraestructura voleu auditar i us prepararem una proposta amb l'abast, el calendari i el pressupost.</p>
+          <a class="btn btn--primary" href="mailto:contractes@argoscyberdefense.cat?subject=Sol%C2%B7licitud%20d%27auditoria%20de%20seguretat">
+            <svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg> Sol·licita una auditoria
+          </a>
+        </div>
+        <ul class="contact__list reveal">
+          <li>
+            <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+            <div><h3>Oficines</h3><p>Carrer de Llull, 321, 2n 4a<br>08019 Barcelona</p></div>
+          </li>
+          <li>
+            <svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg>
+            <div><h3>Correu electrònic</h3><p><a href="mailto:contractes@argoscyberdefense.cat">contractes@argoscyberdefense.cat</a><br><span class="muted">Incidències:</span> <a href="mailto:incidencies@argoscyberdefense.cat">incidencies@argoscyberdefense.cat</a></p></div>
+          </li>
+          <li>
+            <svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>
+            <div><h3>Horari de servei</h3><p>De dilluns a dissabte<br>de 8:00 a 17:00 h</p></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ PEU ============ -->
+  <footer class="site-footer">
+    <div class="container footer">
+      <div class="footer__brand">
+        <img src="assets/img/logo/argos-logo-horitzontal-negatiu.svg" alt="Argos Cyber Defense" width="170" height="61" loading="lazy">
+        <p>Detectem, analitzem i prevenim les vulnerabilitats de la vostra infraestructura.</p>
+      </div>
+
+      <nav class="footer__links" aria-label="Enllaços del peu de pàgina">
+        <h3>Recursos</h3>
+        <ul>
+          <li><a href="descarregues/sentinelx-audit-suite-v1.0.0.zip" download>Descarrega SentinelX</a></li>
+          <li><a href="descarregues/argos-kit-identitat-visual.zip" download>Kit d'identitat visual</a></li>
+          <li data-repo-only hidden><a href="#" data-repo-path="">Repositori a GitHub</a></li>
+          <li><a href="LICENSE">Text de la llicència</a></li>
+        </ul>
+      </nav>
+
+      <div class="footer__project">
+        <h3>Projecte acadèmic</h3>
+        <p>Projecte intermodular de 2n curs del CFGS d'Administració de Sistemes Informàtics en Xarxa (ASIX), perfil de ciberseguretat · Institut de l'Ebre, Tortosa.</p>
+        <p class="muted">Argos Cyber Defense, S.L. és una empresa fictícia creada amb finalitats acadèmiques. Aquesta web no utilitza galetes ni carrega recursos de tercers.</p>
+      </div>
+    </div>
+
+    <div class="container footer__legal">
+      <p>
+        <a class="cc-badge" rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ca">CC BY-NC-SA 4.0</a>
+        © 2026 Razvan Nastasa Ghitau, Lluc Sarrà Masdeu i Mouhammed Oualy. Aquesta obra està subjecta a una llicència <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ca">Creative Commons Reconeixement-NoComercial-CompartirIgual 4.0 Internacional</a>.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>

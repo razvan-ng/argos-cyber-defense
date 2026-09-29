@@ -1,0 +1,181 @@
+/* Argos Cyber Defense · Landing page
+   Sense dependències externes ni galetes. */
+
+// S'executa abans de pintar la pàgina: activa els estils que depenen de JavaScript
+document.documentElement.classList.add("js");
+
+document.addEventListener("DOMContentLoaded", function () {
+  initHeader();
+  initMobileNav();
+  initActiveSection();
+  initReveal();
+  initTeamPhotos();
+  initRepoLinks();
+  initCopyButtons();
+});
+
+/* Capçalera: canvia d'aspecte quan es fa scroll */
+function initHeader() {
+  var header = document.getElementById("capcalera");
+  if (!header) return;
+  var update = function () {
+    header.classList.toggle("is-scrolled", window.scrollY > 12);
+  };
+  update();
+  window.addEventListener("scroll", update, { passive: true });
+}
+
+/* Menú desplegable en pantalles petites */
+function initMobileNav() {
+  var toggle = document.querySelector(".nav-toggle");
+  var nav = document.getElementById("menu-principal");
+  if (!toggle || !nav) return;
+
+  var setOpen = function (open) {
+    toggle.setAttribute("aria-expanded", String(open));
+    nav.classList.toggle("is-open", open);
+  };
+
+  toggle.addEventListener("click", function () {
+    setOpen(toggle.getAttribute("aria-expanded") !== "true");
+  });
+  nav.addEventListener("click", function (e) {
+    if (e.target.closest("a")) setOpen(false);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") setOpen(false);
+  });
+}
+
+/* Marca l'enllaç del menú corresponent a la secció visible */
+function initActiveSection() {
+  if (!("IntersectionObserver" in window)) return;
+  var links = document.querySelectorAll('.site-nav ul a[href^="#"]');
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      links.forEach(function (a) { a.classList.remove("is-active"); });
+      var link = byId[entry.target.id];
+      if (link) link.classList.add("is-active");
+    });
+  }, { rootMargin: "-45% 0px -50% 0px" });
+
+  document.querySelectorAll("main section[id]").forEach(function (s) { observer.observe(s); });
+}
+
+/* Aparició suau dels blocs en fer scroll */
+function initReveal() {
+  var items = document.querySelectorAll(".reveal");
+  if (!("IntersectionObserver" in window)) {
+    items.forEach(function (el) { el.classList.add("is-visible"); });
+    return;
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+  items.forEach(function (el) { observer.observe(el); });
+}
+
+/* Fotografies de l'equip.
+   Cada imatge es busca a assets/img/equip/ amb el nom indicat a data-photo
+   i s'accepten diverses extensions. Si no n'hi ha cap, es mostren les inicials. */
+var PHOTO_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".JPG", ".JPEG", ".PNG"];
+
+function initTeamPhotos() {
+  document.querySelectorAll("img[data-photo]").forEach(function (img) {
+    var base = img.getAttribute("data-photo");
+    var figure = img.closest(".member__photo");
+
+    // Mentre es busca la fotografia es mostren les inicials
+    if (figure) figure.classList.add("is-empty");
+    img.removeAttribute("src");
+
+    var probe = function (index) {
+      if (index >= PHOTO_EXTENSIONS.length) return; // cap fotografia: es queden les inicials
+      var url = base + PHOTO_EXTENSIONS[index];
+      var test = new Image();
+      test.onload = function () {
+        img.src = url;
+        if (figure) figure.classList.remove("is-empty");
+      };
+      test.onerror = function () { probe(index + 1); };
+      test.src = url;
+    };
+    probe(0);
+  });
+}
+
+/* Enllaços al repositori de GitHub.
+   Quan la web està publicada a https://USUARI.github.io/REPOSITORI/,
+   es dedueix automàticament l'adreça https://github.com/USUARI/REPOSITORI. */
+function initRepoLinks() {
+  var repoUrl = getRepoUrl();
+
+  document.querySelectorAll("[data-repo-path]").forEach(function (a) {
+    if (!repoUrl) return;
+    var path = a.getAttribute("data-repo-path");
+    a.href = path ? repoUrl + "/" + path : repoUrl;
+    a.rel = "noopener";
+  });
+
+  document.querySelectorAll("[data-repo-only]").forEach(function (el) {
+    if (repoUrl) el.hidden = false;
+    else el.remove();
+  });
+}
+
+function getRepoUrl() {
+  var host = window.location.hostname.toLowerCase();
+  var suffix = ".github.io";
+  if (host.slice(-suffix.length) !== suffix) return null;
+
+  var user = host.slice(0, -suffix.length);
+  var firstSegment = window.location.pathname.split("/").filter(Boolean)[0];
+  // Web de projecte: /REPOSITORI/...  ·  Web d'usuari: el repositori es diu USUARI.github.io
+  var repo = firstSegment && !/\.[a-z0-9]+$/i.test(firstSegment) ? firstSegment : host;
+  return "https://github.com/" + user + "/" + repo;
+}
+
+/* Botó per copiar les ordres d'instal·lació */
+function initCopyButtons() {
+  document.querySelectorAll("[data-copy-target]").forEach(function (btn) {
+    var label = btn.querySelector("span");
+    btn.addEventListener("click", function () {
+      var target = document.getElementById(btn.getAttribute("data-copy-target"));
+      if (!target) return;
+      copyText(target.innerText.trim()).then(function () {
+        btn.classList.add("is-copied");
+        if (label) label.textContent = "Copiat!";
+        setTimeout(function () {
+          btn.classList.remove("is-copied");
+          if (label) label.textContent = "Copia";
+        }, 1800);
+      });
+    });
+  });
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise(function (resolve) {
+    var area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.className = "visually-hidden";
+    document.body.appendChild(area);
+    area.select();
+    try { document.execCommand("copy"); } catch (e) { /* sense suport */ }
+    document.body.removeChild(area);
+    resolve();
+  });
+}
