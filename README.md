@@ -58,19 +58,6 @@ Conté dues parts:
 └── README.md
 ```
 
-## Publicar la web amb GitHub Pages
-
-1. Creeu un repositori nou a GitHub (per exemple, `argos-cyber-defense`) i pugeu-hi tot el
-   contingut d'aquesta carpeta (**Add file → Upload files**).
-2. Aneu a **Settings → Pages**.
-3. A **Build and deployment → Source**, trieu **Deploy from a branch**.
-4. Seleccioneu la branca **`main`** i la carpeta **`/ (root)`** i premeu **Save**.
-5. Al cap d'un o dos minuts, la web estarà disponible a
-   `https://<usuari>.github.io/<repositori>/`.
-
-Els enllaços de la web cap al codi font de GitHub es generen automàticament a partir d'aquesta
-adreça, no cal editar res.
-
 ## SentinelX Audit Suite
 
 Aplicació d'escriptori en Python (CustomTkinter) per fer auditories de seguretat: descobriment
