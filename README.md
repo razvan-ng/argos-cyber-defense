@@ -88,12 +88,6 @@ Els botons **Sol·licita una auditoria** obren un formulari. Les respostes s'env
 electrònic a `llucsarra@iesebre.com` a través de [FormSubmit](https://formsubmit.co), un servei
 gratuït que no necessita compte ni servidor propi.
 
-- La **primera vegada** que s'envia el formulari des de la web publicada, FormSubmit envia un
-  correu de confirmació a aquesta adreça: cal obrir-lo i prémer **Activate Form**. A partir
-  d'aquí, cada sol·licitud arriba com un correu amb totes les dades en una taula.
-- Per canviar el correu de destinació, modifiqueu els atributs `action` i `data-contact` del
-  formulari a `index.html`.
-
 ## Seguretat de la web
 
 La landing page és completament estàtica i no carrega cap recurs extern: no hi ha galetes,
