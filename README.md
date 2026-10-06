@@ -86,7 +86,31 @@ Tota la documentació és a [`sentinelx/README.md`](sentinelx/README.md) i
 
 Els botons **Sol·licita una auditoria** obren un formulari. Les respostes s'envien per correu
 electrònic a `llucsarra@iesebre.com` a través de [FormSubmit](https://formsubmit.co), un servei
-gratuït que no necessita compte ni servidor propi.
+gratF3t que no necessita compte ni servidor propi.
+
+## Tecnologies de la landing page
+
+La landing page és una web estàtica, responsive i autònoma, desenvolupada sense frameworks ni
+biblioteques de tercers.
+
+- **HTML5:** estructura semàntica de la pàgina, seccions, navegació, formulari i metadades SEO,
+  definida principalment a [`index.html`](index.html).
+- **CSS3:** disseny visual i responsive amb CSS Grid, Flexbox, variables CSS, media queries,
+  gradients, animacions, transicions i `backdrop-filter`, definit a
+  [`assets/css/style.css`](assets/css/style.css).
+- **JavaScript vanilla:** interactivitat sense React, Vue, Angular ni jQuery. Gestiona el menú
+  mòbil, les animacions d'aparició, la detecció de seccions visibles, la càrrega de fotografies,
+  els enllaços dinàmics a GitHub, el botó de còpia i el formulari modal, mitjançant
+  [`assets/js/main.js`](assets/js/main.js).
+- **SVG:** logotips i icones vectorials, incloent-hi un sprite SVG definit directament a l'HTML.
+- **Web App Manifest:** [`site.webmanifest`](site.webmanifest) defineix el nom, els colors,
+  les icones i el mode de visualització de la web.
+- **FormSubmit:** servei extern utilitzat per enviar per correu electrònic les sol·licituds del
+  formulari, sense necessitat d'un backend propi.
+- **GitHub Pages:** servei utilitzat per publicar la web corporativa.
+
+La landing page no utilitza frameworks, backend propi, galetes, analítiques, fonts externes ni
+scripts de tercers. L'única connexió externa permesa és l'enviament del formulari a FormSubmit.
 
 ## Seguretat de la web
 
