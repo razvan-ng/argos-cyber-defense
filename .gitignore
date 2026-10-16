@@ -1,0 +1,18 @@
+# Entorn virtual i memòria cau de Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Compilació amb PyInstaller
+build/
+dist/
+*.spec
+
+# Registres de l'instal·lador
+install_dependencies.log
+
+# Fitxers de configuració amb contrasenyes o tokens (no s'han de pujar mai)
+config.php
+portal.json
+.env

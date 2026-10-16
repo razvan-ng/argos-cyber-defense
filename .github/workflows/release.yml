@@ -1,0 +1,52 @@
+name: Publica SentinelX
+
+# Crea una release de GitHub amb SentinelX empaquetat en .zip cada vegada que es puja una
+# etiqueta de versió (per exemple: git tag v2.0.0 && git push origin v2.0.0).
+# La web enllaça sempre a l'última versió:
+#   https://github.com/razvan-ng/argos-cyber-defense/releases/latest/download/sentinelx-audit-suite.zip
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descarrega el codi
+        uses: actions/checkout@v4
+
+      - name: Comprova que l'etiqueta coincideix amb la versió de SentinelX
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          APP=$(python3 -c "import json; print(json.load(open('sentinelx/data/branding.json'))['version'])")
+          if [ "$TAG" != "$APP" ]; then
+            echo "::error::L'etiqueta v$TAG no coincideix amb la versió $APP de sentinelx/data/branding.json"
+            exit 1
+          fi
+
+      - name: Comprova la sintaxi del codi Python
+        run: python3 -m compileall -q sentinelx
+
+      - name: Empaqueta SentinelX
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          mkdir -p dist
+          rsync -a --exclude '__pycache__' --exclude 'venv' --exclude '*.log' sentinelx/ sentinelx-audit-suite/
+          cp LICENSE sentinelx-audit-suite/
+          chmod +x sentinelx-audit-suite/install_dependencies.sh
+          zip -qr "dist/sentinelx-audit-suite-${VERSION}.zip" sentinelx-audit-suite
+          # Còpia amb nom fix perquè l'enllaç de descàrrega de la web no canviï mai
+          cp "dist/sentinelx-audit-suite-${VERSION}.zip" dist/sentinelx-audit-suite.zip
+
+      - name: Crea la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.zip \
+            --title "SentinelX Audit Suite ${GITHUB_REF_NAME}" \
+            --generate-notes
