@@ -26,6 +26,8 @@ from urllib.parse import urlparse
 
 import requests
 
+from core import tls
+
 API_PREFIX = "/api/v1"
 DEFAULT_TIMEOUT = 60
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
@@ -122,12 +124,17 @@ class PortalClient:
         try:
             # Sense seguir redireccions: un POST redirigit es convertiria en GET i les
             # credencials podrien acabar en un altre servidor.
-            response = requests.request(
+            response = tls.request(
                 method, url, headers=headers, json=payload, params=params, timeout=self.timeout,
                 allow_redirects=False,
             )
         except requests.exceptions.SSLError as exc:
-            raise PortalError(f"No s'ha pogut verificar el certificat HTTPS del portal ({exc}).") from exc
+            raise PortalError(
+                "No s'ha pogut verificar el certificat HTTPS del portal. Comproveu que el certificat SSL "
+                "de la web està instal·lat i actiu. Si us connecteu des d'una xarxa que inspecciona el "
+                "trànsit HTTPS (per exemple, la d'un centre educatiu o d'una empresa), el certificat que "
+                f"arriba no és el del portal: proveu-ho des d'una altra xarxa. Detall: {exc}"
+            ) from exc
         except requests.exceptions.Timeout as exc:
             raise PortalError("El portal no ha respost a temps. Torneu-ho a provar d'aquí a una estona.") from exc
         except requests.exceptions.ConnectionError as exc:

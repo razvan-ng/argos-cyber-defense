@@ -153,6 +153,7 @@ sentinelx/
 ├── QUICKSTART.md                # Guia d'inici ràpid (5-6 passos)
 ├── data/
 │   ├── cve_signatures.json     # Diccionari local de signatures CVE
+│   ├── certs/                   # Certificats intermedis de Let's Encrypt (vegeu core/tls.py)
 │   └── branding.json            # Configuració de marca (nom, empresa, colors...)
 ├── core/                       # Lògica de negoci (sense dependències de GUI)
 │   ├── models.py                # Dataclasses: HostResult, ServiceInfo, Vulnerability...
@@ -166,6 +167,7 @@ sentinelx/
 │   ├── exploit_intel.py          # Consulta d'exploits coneguts (searchsploit)
 │   ├── report_generator.py       # Generació d'informes HTML/PDF/JSON/CSV
 │   ├── portal_client.py          # Connexió amb el portal (sessió, expedients, auditories)
+│   ├── tls.py                    # Completa la cadena de certificats si el hosting no l'envia
 │   ├── expedient_io.py           # Mode fitxer: expedients i auditories sense connexió directa
 │   ├── updates.py                # Comprovació de versions noves a GitHub
 │   └── session_io.py             # Desar/carregar sessions i comparació amb baseline
@@ -328,6 +330,7 @@ no passen la primera capçalera a PHP). Les respostes són JSON amb el camp `ok`
 | Missatge | Causa i solució |
 |----------|-----------------|
 | *L'allotjament del portal bloqueja les connexions...* | El hosting (p. ex. InfinityFree) només deixa entrar navegadors. Feu servir el mode fitxer. |
+| *No s'ha pogut verificar el certificat HTTPS del portal...* | El certificat SSL de la web no està instal·lat o ha caducat, o la xarxa inspecciona el trànsit HTTPS (centres educatius, empreses). Si el hosting envia el certificat sense l'intermedi, SentinelX el completa sol (Let's Encrypt). |
 | *Massa intents fallits...* | Després de 3 intents fallits cal esperar 5 minuts (després 15 i 60). |
 | *Només els administradors poden iniciar la sessió a SentinelX* | L'usuari és un client. Feu servir un usuari administrador. |
 | *La sessió ha caducat* | Han passat 8 hores o un administrador ha tancat la sessió. Torneu a iniciar-la. |

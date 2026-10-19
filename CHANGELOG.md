@@ -9,6 +9,17 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.0.1] · 2026-10
+
+### Corregit
+- La connexió amb el portal fallava amb l'error «unable to get local issuer certificate» quan
+  l'allotjament (com InfinityFree) envia el certificat SSL sense el certificat intermedi.
+  SentinelX porta ara els certificats intermedis públics de Let's Encrypt
+  (`sentinelx/data/certs`) i completa la cadena pel seu compte. La verificació HTTPS continua
+  activa: la cadena ha d'acabar en una arrel de confiança i el certificat ha de ser del domini.
+- Missatge més clar quan no es pot verificar el certificat del portal (certificat no instal·lat
+  o xarxa que inspecciona el trànsit HTTPS).
+
 ## [2.0.0] · 2026-10
 
 Integració completa amb la web i l'Àrea de clients d'Argos Cyber Defense.
