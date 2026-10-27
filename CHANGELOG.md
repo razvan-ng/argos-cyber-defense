@@ -1,4 +1,4 @@
-# Registre de canvis · SentinelX Audit Suite
+# Registre de canvis - SentinelX Audit Suite
 
 Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 
@@ -9,7 +9,19 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
-## [2.0.1] · 2026-10
+## [2.1.0] - 2026-10
+
+### Afegit
+- Inici de sessió al portal amb **verificació en dos passos**: si l'administrador té el 2FA
+  activat a la web, la finestra d'inici de sessió demana el codi de l'aplicació d'autenticació
+  (o un codi de recuperació). Sense el codi, el portal no obre la sessió.
+
+### Canviat
+- Les notícies de la web es recullen ara amb GitHub Actions (workflow «Notícies de la web») i es
+  publiquen a la branca `noticies` del repositori, perquè l'allotjament de la web no pot
+  connectar amb les fonts externes.
+
+## [2.0.1] - 2026-10
 
 ### Corregit
 - La connexió amb el portal fallava amb l'error «unable to get local issuer certificate» quan
@@ -20,7 +32,7 @@ Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coi
 - Missatge més clar quan no es pot verificar el certificat del portal (certificat no instal·lat
   o xarxa que inspecciona el trànsit HTTPS).
 
-## [2.0.0] · 2026-10
+## [2.0.0] - 2026-10
 
 Integració completa amb la web i l'Àrea de clients d'Argos Cyber Defense.
 

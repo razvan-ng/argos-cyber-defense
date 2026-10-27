@@ -39,6 +39,10 @@ BLOCK_MARKERS = ("aes.js", "slowaes", "this site requires javascript", "__test="
 class PortalError(Exception):
     """Error de comunicació amb el portal, amb un missatge apte per mostrar a l'usuari."""
 
+    def __init__(self, message="", code=""):
+        super().__init__(message)
+        self.code = code  # codi d'error de l'API (p. ex. "cal_2fa"), buit si l'error no ve del portal
+
 
 class PortalAuthError(PortalError):
     """La sessió ha caducat o les credencials no són vàlides."""
@@ -169,17 +173,24 @@ class PortalClient:
             error = data.get("error") if isinstance(data, dict) else None
             message = error.get("missatge") if isinstance(error, dict) else None
             message = message or f"El portal ha retornat un error (HTTP {response.status_code})."
+            code = str(error.get("codi", "")) if isinstance(error, dict) else ""
             if response.status_code == 401:
-                raise PortalAuthError(message)
-            raise PortalError(message)
+                raise PortalAuthError(message, code)
+            raise PortalError(message, code)
         return data
 
     # --- Sessió ---------------------------------------------------- #
-    def login(self, email, password, device=""):
-        """Inicia la sessió amb un usuari administrador del portal."""
-        data = self._request(
-            "POST", "sessio.php", {"email": email, "contrasenya": password, "equip": device}, auth=False,
-        )
+    def login(self, email, password, device="", code=""):
+        """Inicia la sessió amb un usuari administrador del portal.
+
+        `code` és el codi de verificació en dos passos (aplicació d'autenticació o codi de
+        recuperació). Si el compte el té activat i no s'envia, el portal respon amb el codi
+        d'error "cal_2fa".
+        """
+        payload = {"email": email, "contrasenya": password, "equip": device}
+        if code:
+            payload["codi_2fa"] = code
+        data = self._request("POST", "sessio.php", payload, auth=False)
         self.token = data.get("token", "")
         self.user = data.get("usuari") or {}
         self.expires_at = data.get("expira_el", "")
