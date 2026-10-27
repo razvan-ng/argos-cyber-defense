@@ -1,0 +1,46 @@
+name: Notícies de la web
+
+# Recull cada 3 hores les notícies de ciberseguretat per a argoscyberdefense.tech i les publica a
+# la branca `noticies` (noticies.json). L'allotjament de la web no pot connectar amb les fonts
+# externes, però sí que pot llegir (ell o el navegador del visitant) aquest fitxer de GitHub:
+#   https://raw.githubusercontent.com/razvan-ng/argos-cyber-defense/noticies/noticies.json
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/scripts/noticies.py"
+      - ".github/workflows/noticies.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: noticies
+  cancel-in-progress: false
+
+jobs:
+  noticies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Descarrega el codi
+        uses: actions/checkout@v4
+
+      - name: Recull les notícies
+        run: python3 .github/scripts/noticies.py "$RUNNER_TEMP/noticies.json"
+
+      - name: Publica-les a la branca noticies
+        run: |
+          # La branca només conté l'últim fitxer (un sol commit) perquè el repositori no creixi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan noticies
+          git rm -rq --cached .
+          cp "$RUNNER_TEMP/noticies.json" noticies.json
+          git add -f noticies.json
+          git commit -qm "Notícies $(date -u '+%Y-%m-%d %H:%M') UTC"
+          git push -fq origin noticies
