@@ -58,7 +58,7 @@ class LoginDialog(_PortalDialog):
     """Inici de sessió amb un usuari administrador de la web."""
 
     def __init__(self, master, client, email="", on_success=None):
-        super().__init__(master, "Inicia la sessió al portal", "460x440")
+        super().__init__(master, "Inicia la sessió al portal", "460x520")
         self.client = client
         self.on_success = on_success
 
@@ -74,6 +74,9 @@ class LoginDialog(_PortalDialog):
         ctk.CTkLabel(self, text="Contrasenya").pack(anchor="w", padx=24)
         self.password_entry = ctk.CTkEntry(self, width=410, show="•")
         self.password_entry.pack(padx=24, pady=(2, 10))
+        ctk.CTkLabel(self, text="Codi de verificació (només si teniu el 2FA activat)").pack(anchor="w", padx=24)
+        self.code_entry = ctk.CTkEntry(self, width=410, placeholder_text="6 xifres de l'aplicació o codi de recuperació")
+        self.code_entry.pack(padx=24, pady=(2, 10))
         ctk.CTkLabel(self, text="Nom d'aquest equip (apareix al registre del portal)").pack(anchor="w", padx=24)
         self.device_entry = ctk.CTkEntry(self, width=410)
         self.device_entry.pack(padx=24, pady=(2, 10))
@@ -97,7 +100,8 @@ class LoginDialog(_PortalDialog):
         self.login_btn.configure(state="disabled", text="Connectant...")
         self.status.configure(text="")
         device = self.device_entry.get().strip()
-        self._run(lambda: self.client.login(email, password, device), self._on_logged_in, self._on_error)
+        code = self.code_entry.get().strip()
+        self._run(lambda: self.client.login(email, password, device, code), self._on_logged_in, self._on_error)
 
     def _on_logged_in(self, _result):
         self._close()
@@ -106,6 +110,12 @@ class LoginDialog(_PortalDialog):
 
     def _on_error(self, exc):
         self.login_btn.configure(state="normal", text="Inicia la sessió")
+        self.code_entry.delete(0, "end")
+        if getattr(exc, "code", "") in ("cal_2fa", "codi_2fa"):
+            # La contrasenya era correcta: només cal el codi de l'aplicació d'autenticació
+            self.status.configure(text=str(exc))
+            self.code_entry.focus_set()
+            return
         self.password_entry.delete(0, "end")
         message = str(exc)
         if isinstance(exc, PortalBlockedError):
