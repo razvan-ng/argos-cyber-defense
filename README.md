@@ -47,11 +47,12 @@ La darrera versió empaquetada és a la pàgina de
 
 ## SentinelX Audit Suite
 
-Aplicació d'escriptori en Python (CustomTkinter) per fer auditories de seguretat: descobriment
-d'equips i serveis amb nmap, auditoria i reforçament del sistema local, correlació de
+Aplicació d'escriptori en Python (CustomTkinter) per fer auditories de seguretat:
+**reconeixement passiu amb l'API de Shodan** (dominis, ports i serveis exposats a Internet sense
+enviar cap paquet a l'objectiu), descobriment d'equips i serveis amb nmap, auditoria i reforçament del sistema local, correlació de
 vulnerabilitats amb CVE (diccionari local, NVD API i scripts NSE), generació d'informes en
 HTML, PDF, JSON i CSV, **expedients i reauditories** connectats amb la web i publicació dels
-resultats a l'**Àrea de clients**. La versió actual és la **2.0.0** (vegeu el [registre de canvis](CHANGELOG.md)).
+resultats a l'**Àrea de clients**. La versió actual és la **2.2.0** (vegeu el [registre de canvis](CHANGELOG.md)).
 
 Inici ràpid a Ubuntu 24.04 / 26.04 LTS:
 

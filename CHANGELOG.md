@@ -9,6 +9,36 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.2.0] - 2026-11
+
+### Afegit
+- Pestanya **Reconeixement passiu** amb l'API de Shodan, per saber què hi ha exposat a Internet
+  abans de llançar escanejos actius i sense enviar cap paquet a l'objectiu:
+  - **Consulta d'host**: IP, noms de domini associats, ports oberts, organització o ISP,
+    ubicació i data de la darrera actualització a Shodan.
+  - **Identificació de serveis** (banner grabbing): producte i versió de cada port. Si Shodan no
+    ha identificat el producte, es treu del banner (capçalera SSH o `Server:` d'HTTP).
+  - **Cerca de serveis**: els primers 5 o 10 equips amb un producte o servei (IP, port i
+    organització). Amb el pla gratuït de Shodan, que no permet la cerca, es mostra el resum
+    agregat per ports, organitzacions, països i productes.
+  - **Afegeix a l'auditoria**: l'equip consultat passa a la sessió (sense substituir els serveis
+    trobats amb nmap) i es pot correlacionar amb CVE, comparar i publicar a l'expedient. A
+    l'informe, els ports que només coneix Shodan surten marcats amb un asterisc.
+- Script de terminal `sentinelx/shodan_recon.py` amb les mateixes funcions i un menú.
+- La clau de l'API es desa al perfil de l'usuari (`shodan.json`, permisos 600) o es llegeix de
+  la variable d'entorn `SHODAN_API_KEY`. No es guarda mai al codi ni a l'expedient.
+
+### Canviat
+- Nova dependència de Python: `shodan` (la llibreria oficial). Si actualitzeu una instal·lació
+  existent, torneu a executar `./install_dependencies.sh` o `venv/bin/pip install shodan`.
+
+- La consulta a la NVD només es fa quan es coneix la versió del servei: amb només el nom
+  (p. ex. «ssh») retornava CVE antics que no tenien res a veure amb el servei.
+
+### Corregit
+- La barra de progrés de l'Auditoria de Xarxa ja no queda mig pintada quan no hi ha cap
+  escaneig en curs.
+
 ## [2.1.0] - 2026-10
 
 ### Afegit

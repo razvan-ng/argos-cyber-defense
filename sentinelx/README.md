@@ -29,33 +29,37 @@ realitzar auditories tècniques completes:
    ordenades per risc), l'interruptor de **Mode Segur** (activat per defecte: les accions més
    intrusives demanen confirmació explícita), una guia de primers passos i accés directe a la
    resta de mòduls.
-1. **Auditoria de Xarxa Avançada** — descobriment d'equips (`nmap -sn`), escaneig de ports i
+1. **Reconeixement passiu (Shodan)** — abans dels escanejos actius, consulta a l'API de Shodan què
+   se sap de l'objectiu a Internet: noms de domini, ports oberts i producte i versió de cada
+   servei (banner grabbing), i cerca d'equips per servei o producte. No envia cap paquet a la
+   xarxa auditada. Els resultats es poden afegir a l'auditoria (vegeu l'apartat 8).
+2. **Auditoria de Xarxa Avançada** — descobriment d'equips (`nmap -sn`), escaneig de ports i
    detecció de serveis/versions/SO (`nmap -sV -O`), amb control sobre l'abast de l'escaneig
    (ports habituals, tots els ports `-p-`, ports personalitzats, i escaneig UDP `-sU`), i traçat
    de rutes (`traceroute`/`tracepath`). Doble clic sobre un equip detectat copia la seva IP al
    camp d'objectiu.
-2. **Auditoria de Sistema Local** — interfícies, connexions actives, processos, usuaris i estat
+3. **Auditoria de Sistema Local** — interfícies, connexions actives, processos, usuaris i estat
    del tallafocs (`ufw`), mitjançant `psutil`; i una pestanya de **Reforçament (Hardening)** que
    detecta actualitzacions pendents, binaris amb bit SUID/SGID, comptes addicionals amb
    privilegis de root (UID 0) i comptes sense contrasenya.
-3. **Correlació de Vulnerabilitats i CVE** — dos mètodes complementaris:
+4. **Correlació de Vulnerabilitats i CVE** — dos mètodes complementaris:
    - **Anàlisi passiu**: creua els serveis/versions detectats amb un diccionari local de CVEs
      conegudes i, opcionalment, amb la API pública de la NVD, incloent la comprovació d'exploits
      públics coneguts via `searchsploit` (Exploit-DB).
    - **Escaneig actiu**: executa els scripts de vulnerabilitats de nmap (NSE, `--script vuln`)
      directament contra un objectiu, que confirmen la troballa interactuant amb el servei real.
    La taula de resultats es pot filtrar en temps real per IP, servei, CVE, gravetat o text lliure.
-4. **Generador d'Informes** — exportació a HTML, PDF, JSON i CSV amb resum executiu, matriu de
+5. **Generador d'Informes** — exportació a HTML, PDF, JSON i CSV amb resum executiu, matriu de
    troballes, reforçament del sistema local i pla de millora.
-5. **Sessions d'auditoria** — desar i carregar l'estat complet d'una auditoria en JSON, i
+6. **Sessions d'auditoria** — desar i carregar l'estat complet d'una auditoria en JSON, i
    **comparar-lo amb una auditoria anterior (baseline)** per detectar equips, ports o
    vulnerabilitats nous des de l'última revisió.
-6. **Expedients i portal de clients** — inici de sessió amb l'usuari administrador de la web,
+7. **Expedients i portal de clients** — inici de sessió amb l'usuari administrador de la web,
    expedients de cada client, **reauditories** comparades amb l'auditoria anterior (resoltes,
    noves i pendents), desament automàtic a l'expedient i publicació a l'Àrea de clients de
    [argoscyberdefense.tech](https://argoscyberdefense.tech). Inclou un mode fitxer per a allotjaments
    que no permeten la connexió directa (vegeu l'apartat 7).
-7. **Actualitzacions** — avisa quan hi ha una versió nova publicada a GitHub.
+8. **Actualitzacions** — avisa quan hi ha una versió nova publicada a GitHub.
 
 Totes les operacions pesades s'executen en fils independents (threading) perquè la interfície
 no es bloquegi, amb una consola de logs en temps real i indicadors de progrés visuals.
@@ -148,6 +152,7 @@ python main.py
 ```
 sentinelx/
 ├── main.py                     # Punt d'entrada
+├── shodan_recon.py             # Reconeixement passiu amb Shodan des del terminal
 ├── requirements.txt
 ├── install_dependencies.sh     # Instal·lador automàtic (Ubuntu 24.04/26.04)
 ├── QUICKSTART.md                # Guia d'inici ràpid (5-6 passos)
@@ -165,6 +170,7 @@ sentinelx/
 │   ├── system_audit.py           # Auditoria de host local (psutil, ufw) i reforçament
 │   ├── vuln_correlator.py        # Correlació CVE (local + NVD API + NSE)
 │   ├── exploit_intel.py          # Consulta d'exploits coneguts (searchsploit)
+│   ├── shodan_intel.py           # Reconeixement passiu amb l'API de Shodan
 │   ├── report_generator.py       # Generació d'informes HTML/PDF/JSON/CSV
 │   ├── portal_client.py          # Connexió amb el portal (sessió, expedients, auditories)
 │   ├── tls.py                    # Completa la cadena de certificats si el hosting no l'envia
@@ -175,7 +181,7 @@ sentinelx/
 │   ├── app.py                    # Finestra principal
 │   ├── theme.py                  # Identitat corporativa (des de branding.json) i colors
 │   ├── widgets/                  # Consola, dependències, comparació i diàlegs del portal
-│   └── tabs/                     # Pestanyes: Tauler, Expedients, Xarxa, Sistema, CVE, Informes, Quant a
+│   └── tabs/                     # Pestanyes: Tauler, Expedients, Reconeixement, Xarxa, Sistema, CVE, Informes, Quant a
 └── utils/
     ├── shell.py                   # Execució asíncrona de comandes externes
     └── resources.py               # Resolució de rutes compatible amb PyInstaller
@@ -253,7 +259,9 @@ en compilacions posteriors (`pyinstaller SentinelX.spec`).
   (producte + prefix de versió) amb finalitats docents; no substitueix un escàner CPE/CVE
   professional complet com OpenVAS o Nessus.
 - La consulta en línia a la NVD API és opcional (checkbox a la pestanya de Vulnerabilitats) i
-  degrada de forma silenciosa al mode local si no hi ha connexió a Internet.
+  degrada de forma silenciosa al mode local si no hi ha connexió a Internet. Només es consulta quan
+  es coneix la versió del servei, perquè la cerca només pel nom (p. ex. «ssh») dona CVE que no hi
+  tenen res a veure.
 - La detecció d'exploits públics mitjançant `searchsploit` és purament informativa: l'aplicació
   no descarrega, executa ni conté cap codi d'explotació.
 
@@ -336,3 +344,51 @@ no passen la primera capçalera a PHP). Les respostes són JSON amb el camp `ok`
 | *La sessió ha caducat* | Han passat 8 hores o un administrador ha tancat la sessió. Torneu a iniciar-la. |
 | *El portal redirigeix la petició a...* | Feu servir l'adreça exacta que indica el missatge (p. ex. sense `www`). |
 | *La petició supera la mida màxima permesa* | Desmarqueu «Inclou l'informe PDF» o reduïu l'abast de l'auditoria. |
+
+## 8. Reconeixement passiu amb Shodan
+
+[Shodan](https://www.shodan.io) rastreja Internet contínuament i desa el que respon cada adreça
+pública (ports, banners, productes i versions). Consultar-lo és **reconeixement passiu**: les dades
+ja són a Shodan, de manera que no s'envia cap paquet a la xarxa de l'objectiu i els tallafocs no
+detecten res. Per això és la primera fase de l'auditoria, abans dels escanejos actius amb nmap.
+
+### Clau de l'API
+
+1. Creeu un compte a [account.shodan.io](https://account.shodan.io) i copieu-hi la clau de l'API.
+2. Pestanya **Reconeixement passiu** → enganxeu la clau i premeu **Desa la clau**. Es desa a
+   `~/.config/sentinelx/shodan.json` (Linux) o `%APPDATA%\SentinelX\shodan.json` (Windows), amb
+   permisos `600`. També es pot fer servir la variable d'entorn `SHODAN_API_KEY`, que té prioritat.
+3. **Comprova el pla** mostra el pla de la clau i els crèdits de consulta.
+
+La clau no s'escriu mai al codi ni s'envia al portal: aquest repositori és públic.
+
+### Funcions
+
+| Funció | Què mostra | Pla gratuït |
+|--------|-----------|-------------|
+| Consulta d'host | IP, noms de domini, ports oberts, organització o ISP, ubicació, darrera actualització | Sí |
+| Identificació de serveis | Producte i versió de cada port (o el banner, si Shodan no l'ha identificat) | Sí |
+| Cerca de serveis | Primers 5 o 10 equips amb el producte: IP, port i organització o ISP | No: es mostra el resum per ports, organitzacions, països i productes |
+
+**Afegeix a l'auditoria** passa l'equip consultat a la sessió: si nmap ja l'havia escanejat, només
+s'hi afegeixen els ports que no hi eren. Els serveis queden amb l'estat `open (Shodan)`, es poden
+correlacionar a **Vulnerabilitats i CVE**, es desen a l'expedient i, a l'informe, porten un asterisc
+perquè es vegi que no s'han confirmat amb un escaneig actiu.
+
+### Des del terminal
+
+```bash
+venv/bin/python3 shodan_recon.py
+```
+
+El menú té les mateixes funcions (consulta d'host, identificació de serveis, cerca i estat de la
+clau) i fa servir el mateix mòdul (`core/shodan_intel.py`) que la pestanya.
+
+### Missatges habituals
+
+| Missatge | Causa i solució |
+|----------|-----------------|
+| *És una adreça privada o reservada* | Shodan només coneix adreces públiques. Per a la xarxa interna, feu servir l'Auditoria de Xarxa. |
+| *Shodan no té informació d'aquesta IP* | Shodan no l'ha indexada o no hi ha trobat ports oberts. |
+| *El pla de la clau de Shodan no permet aquesta consulta* | La cerca amb resultats necessita crèdits de consulta (Shodan Membership o pla acadèmic). |
+| *Falta la llibreria de Shodan* | Executeu `./install_dependencies.sh` o `venv/bin/pip install shodan`. |

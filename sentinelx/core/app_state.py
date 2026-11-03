@@ -55,6 +55,26 @@ class AppState:
                 existing[new_host.ip] = new_host
         self.session.hosts = list(existing.values())
 
+    def add_passive_host(self, new_host):
+        """Afegeix a la sessió un equip conegut per reconeixement passiu (Shodan).
+
+        A diferència de merge_hosts, no substitueix els serveis que ja ha trobat un escaneig
+        actiu: només hi afegeix els ports que encara no hi eren. Retorna quants n'ha afegit.
+        """
+        current = next((h for h in self.session.hosts if h.ip == new_host.ip), None)
+        if current is None:
+            self.session.hosts.append(new_host)
+            return len(new_host.services)
+        known = {(s.port, s.protocol) for s in current.services}
+        added = [s for s in new_host.services if (s.port, s.protocol) not in known]
+        current.services.extend(added)
+        current.services.sort(key=lambda s: (s.port, s.protocol))
+        if not current.hostname:
+            current.hostname = new_host.hostname
+        if not current.os_guess:
+            current.os_guess = new_host.os_guess
+        return len(added)
+
     def set_traceroute(self, hops):
         self.session.traceroute_hops = hops
 

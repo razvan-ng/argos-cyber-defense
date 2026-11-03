@@ -15,4 +15,5 @@ install_dependencies.log
 # Fitxers de configuració amb contrasenyes o tokens (no s'han de pujar mai)
 config.php
 portal.json
+shodan.json
 .env

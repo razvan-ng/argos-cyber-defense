@@ -35,11 +35,14 @@ exactament què instal·lar.
 
 ## 4. Fes la teva primera auditoria
 
-1. A la pestanya **Auditoria de Xarxa**, introdueix l'IP o subxarxa a
+1. (Opcional) A la pestanya **Reconeixement passiu**, desa la clau de l'API de Shodan i consulta
+   què se sap de l'IP pública de l'objectiu abans d'escanejar-la. **Afegeix a l'auditoria** en
+   passa els ports i serveis a la sessió.
+2. A la pestanya **Auditoria de Xarxa**, introdueix l'IP o subxarxa a
    auditar (ex. `192.168.1.0/24`) i prem **Descobriment d'Equips**.
-2. Selecciona un equip (doble clic per copiar la seva IP) i executa
+3. Selecciona un equip (doble clic per copiar la seva IP) i executa
    **Escaneig de Ports i Serveis**.
-3. Ves a **Vulnerabilitats i CVE** i prem **Analitzar Serveis Detectats**.
+4. Ves a **Vulnerabilitats i CVE** i prem **Analitzar Serveis Detectats**.
 
 ## 5. Revisa les troballes
 

@@ -78,7 +78,9 @@ class VulnerabilityCorrelator:
                 )
             )
 
-        if self.use_online and product:
+        # Sense versió, la cerca per paraula clau a la NVD (p. ex. només «ssh») retorna CVE de qualsevol
+        # època que no tenen res a veure amb el servei; com al diccionari local, cal conèixer la versió.
+        if self.use_online and product and version:
             findings.extend(self._query_nvd(product, version, on_log))
 
         if self.exploit_intel.is_available():

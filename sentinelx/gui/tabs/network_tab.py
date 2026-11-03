@@ -65,7 +65,7 @@ class NetworkTab(ctk.CTkFrame):
             row=2, column=2, columnspan=2, padx=8, pady=(0, 8), sticky="w"
         )
 
-        self.progress = ctk.CTkProgressBar(self, mode="indeterminate")
+        self.progress = ctk.CTkProgressBar(self, mode="determinate")
         self.progress.pack(fill="x", padx=12, pady=(0, 6))
         self.progress.set(0)
 
@@ -119,9 +119,11 @@ class NetworkTab(ctk.CTkFrame):
         for btn in (self.sweep_btn, self.scan_btn, self.trace_btn):
             btn.configure(state=state)
         if running:
+            self.progress.configure(mode="indeterminate")
             self.progress.start()
         else:
             self.progress.stop()
+            self.progress.configure(mode="determinate")
             self.progress.set(0)
         self.status_label.configure(text="Execució en curs..." if running else "Preparat.")
 

@@ -17,14 +17,16 @@ from gui.theme import (
 GUIDE_STEPS = [
     "0. Expedients — inicia la sessió al portal d'Argos i obre l'expedient del client (o el fitxer d'expedient "
     "descarregat de la web). Si ja té auditories, la nova serà una reauditoria amb el mateix objectiu.",
-    "1. Auditoria de Xarxa — descobreix equips actius i escaneja els seus ports i serveis.",
-    "2. Vulnerabilitats i CVE — correlaciona els serveis detectats amb CVEs coneguts i, si cal, "
+    "1. Reconeixement passiu — consulta a Shodan què se sap de l'objectiu a Internet (dominis, ports oberts i "
+    "serveis) sense enviar-hi cap paquet, i afegeix-ho a l'auditoria.",
+    "2. Auditoria de Xarxa — descobreix equips actius i escaneja els seus ports i serveis.",
+    "3. Vulnerabilitats i CVE — correlaciona els serveis detectats amb CVEs coneguts i, si cal, "
     "executa un escaneig actiu amb els scripts NSE de nmap per confirmar-les.",
-    "3. Sistema Local — audita el propi equip: processos, connexions, tallafocs i reforçament "
+    "4. Sistema Local — audita el propi equip: processos, connexions, tallafocs i reforçament "
     "(actualitzacions pendents, binaris SUID/SGID, comptes de risc).",
-    "4. Informes — genera l'informe final (HTML, PDF, JSON o CSV) amb el resum executiu, la "
+    "5. Informes — genera l'informe final (HTML, PDF, JSON o CSV) amb el resum executiu, la "
     "matriu de troballes i el pla de millora.",
-    "5. Expedients — compara els resultats amb l'auditoria anterior i desa o publica l'auditoria "
+    "6. Expedients — compara els resultats amb l'auditoria anterior i desa o publica l'auditoria "
     "perquè el client la consulti a l'Àrea de clients de la web.",
 ]
 

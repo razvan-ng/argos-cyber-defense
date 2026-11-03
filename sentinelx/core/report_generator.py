@@ -8,6 +8,7 @@ com Cairo/Pango), la qual cosa simplifica molt l'empaquetat amb PyInstaller.
 import datetime
 
 from core.models import Severity
+from core.shodan_intel import SHODAN_STATE
 
 SEVERITY_COLORS = {
     Severity.CRITICAL: "#7B0000",
@@ -16,6 +17,8 @@ SEVERITY_COLORS = {
     Severity.LOW: "#5BC0DE",
     Severity.INFO: "#6C757D",
 }
+
+PASSIVE_NOTE = "* Port conegut per reconeixement passiu (Shodan): no s'ha confirmat amb un escaneig actiu."
 
 SEVERITY_ORDER = [Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM, Severity.LOW, Severity.INFO]
 
@@ -36,6 +39,14 @@ class ReportGenerator:
         self.company_name = company_name
         self.app_name = app_name
         self.app_version = app_version
+
+    def _has_passive_services(self):
+        return any(s.state == SHODAN_STATE for h in self.session.hosts for s in h.services)
+
+    @staticmethod
+    def _service_ref(service):
+        """«80/tcp», amb un asterisc si el port només el coneix Shodan."""
+        return f"{service.port}/{service.protocol}{'*' if service.state == SHODAN_STATE else ''}"
 
     def _collect_findings(self):
         findings = []
@@ -61,6 +72,7 @@ class ReportGenerator:
         counts = self._summary_counts(findings)
         findings_sorted = sorted(findings, key=lambda f: SEVERITY_ORDER.index(f[2].severity))
         now = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
+        passive_note = f'<p class="note">{PASSIVE_NOTE}</p>' if self._has_passive_services() else ""
 
         finding_rows = "".join(self._html_finding_row(h, s, v) for h, s, v in findings_sorted) or (
             '<tr><td colspan="6">No s\'han detectat vulnerabilitats conegudes.</td></tr>'
@@ -97,6 +109,7 @@ class ReportGenerator:
     table {{ width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 32px; }}
     th, td {{ padding: 10px 14px; border-bottom: 1px solid #e2e6ea; text-align: left; font-size: 13px; vertical-align: top; }}
     th {{ background: #0d2137; color: white; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }}
+    .note {{ margin: -24px 0 32px; color: #556; font-size: 12px; }}
     .sev-dot {{ display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }}
     .badge {{ display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; color: white; margin-left: 6px; }}
     .badge-danger {{ background: #7B0000; }}
@@ -124,6 +137,7 @@ class ReportGenerator:
             <tr><th>IP</th><th>Nom d'Host</th><th>MAC</th><th>Sistema Operatiu</th><th>Serveis Oberts</th></tr>
             {host_rows}
         </table>
+        {passive_note}
     </section>
     <section>
         <h2>Matriu de Troballes i Vulnerabilitats (CVE)</h2>
@@ -185,7 +199,9 @@ class ReportGenerator:
 
     @staticmethod
     def _html_host_row(host):
-        services_str = ", ".join(f"{s.port}/{s.protocol} {s.service_name}" for s in host.services) or "cap servei detectat"
+        services_str = ", ".join(
+            f"{ReportGenerator._service_ref(s)} {s.service_name}" for s in host.services
+        ) or "cap servei detectat"
         return (
             "<tr>"
             f"<td>{host.ip}</td><td>{host.hostname or '-'}</td><td>{host.mac or '-'}</td>"
@@ -234,11 +250,13 @@ class ReportGenerator:
         story.append(Paragraph("Inventari d'Equips Detectats", heading_style))
         host_data = [["IP", "Host", "MAC", "SO", "Serveis"]]
         for host in self.session.hosts:
-            services_str = ", ".join(f"{s.port}/{s.protocol}" for s in host.services) or "-"
+            services_str = ", ".join(self._service_ref(s) for s in host.services) or "-"
             host_data.append([host.ip, host.hostname or "-", host.mac or "-", host.os_guess or "Desconegut", services_str])
         if len(host_data) == 1:
             host_data.append(["-", "-", "-", "-", "-"])
         story.append(self._styled_table(host_data, [28 * mm, 30 * mm, 30 * mm, 35 * mm, 47 * mm]))
+        if self._has_passive_services():
+            story.append(Paragraph(PASSIVE_NOTE, normal_style))
         story.append(Spacer(1, 16))
 
         story.append(Paragraph("Matriu de Troballes i Vulnerabilitats", heading_style))
