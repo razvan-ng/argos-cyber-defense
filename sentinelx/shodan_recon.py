@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Reconeixement passiu amb Shodan des del terminal (SentinelX Audit Suite).
+"""Reconeixement passiu des del terminal (SentinelX Audit Suite): Shodan i The Harvester.
 
 Versió de línia d'ordres del mòdul core/shodan_intel.py, que també fa servir la pestanya
 «Reconeixement passiu» de l'aplicació. Cap de les consultes envia paquets a l'objectiu.
+
+L'opció 5 llança The Harvester (cerca OSINT) amb subprocess; cal tenir-lo instal·lat
+(https://github.com/laramies/theHarvester) i accessible com a «theHarvester».
 
 Ús (des de la carpeta de SentinelX):
     venv/bin/python3 shodan_recon.py
@@ -11,6 +14,10 @@ La clau de l'API es llegeix de la variable d'entorn SHODAN_API_KEY o de la confi
 SentinelX (la que es desa a la pestanya). Si no n'hi ha cap, el programa la demana.
 """
 import getpass
+import re
+import shlex
+import shutil
+import subprocess
 import sys
 
 from core.shodan_intel import (
@@ -25,6 +32,7 @@ SentinelX: reconeixement passiu amb Shodan
   2. Identificació de serveis (banner grabbing)
   3. Cerca de serveis específics
   4. Estat de la clau de l'API
+  5. Cerca OSINT amb The Harvester
   0. Surt
 """
 
@@ -88,22 +96,55 @@ def show_key_status(recon, source):
     print(f"Pla: {info['plan']}. Crèdits de consulta: {info['query_credits']}. Crèdits d'escaneig: {info['scan_credits']}.")
 
 
+HARVESTER_SOURCES = ("google", "bing", "linkedin", "all")
+DOMAIN_RE = re.compile(r"^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$")
+
+
+def harvester_search():
+    """Opció 5: demana domini, font i fitxer, construeix la comanda i la llança amb subprocess."""
+    tool = shutil.which("theHarvester")
+    if not tool:
+        print("No es troba theHarvester. Instal·leu-lo: https://github.com/laramies/theHarvester")
+        return
+    domini = input("Domini objectiu (p. ex. iesebre.cat): ").strip().lower()
+    if not DOMAIN_RE.match(domini):
+        print("Domini no vàlid.")
+        return
+    ajuda = subprocess.run([tool, "-h"], capture_output=True, text=True).stdout
+    while True:
+        font = input(f"Font de dades ({', '.join(HARVESTER_SOURCES)}) [all]: ").strip().lower() or "all"
+        if re.search(rf"\b{re.escape(font)}\b", ajuda):
+            break
+        print(f"La versió instal·lada de theHarvester no té la font «{font}» (s'ha retirat de l'eina). "
+              "Trieu «all» o una altra font de «theHarvester -h».")
+    comanda = f"theHarvester -d {shlex.quote(domini)} -b {shlex.quote(font)} -l 500"
+    if input("Voleu desar els resultats en un fitxer HTML o XML? [s/N] ").strip().lower() == "s":
+        nom = input("Nom del fitxer (sense extensió): ").strip()
+        if nom:
+            comanda += f" -f {shlex.quote(nom)}"
+    print(f"[*] Iniciant escaneig sobre {domini} utilitzant {font}...")
+    print(f"[*] Comanda: {comanda}\n")
+    subprocess.call(comanda, shell=True)
+
+
 def main():
-    if not library_available():
-        print("Falta la llibreria de Shodan: instal·leu-la amb «venv/bin/pip install shodan».")
-        return 1
-    key, source = ask_api_key()
-    try:
-        recon = ShodanRecon(key)
-    except ShodanError as exc:
-        print(exc)
-        return 1
+    state = {}
+
+    def shodan():
+        """Connecta amb Shodan només quan es tria una opció de Shodan."""
+        if "recon" not in state:
+            if not library_available():
+                raise ShodanError("Falta la llibreria de Shodan: instal·leu-la amb «venv/bin/pip install shodan».")
+            key, state["source"] = ask_api_key()
+            state["recon"] = ShodanRecon(key)
+        return state["recon"]
 
     actions = {
-        "1": lambda: show_host(recon, with_services=False),
-        "2": lambda: show_host(recon, with_services=True),
-        "3": lambda: show_search(recon),
-        "4": lambda: show_key_status(recon, source),
+        "1": lambda: show_host(shodan(), with_services=False),
+        "2": lambda: show_host(shodan(), with_services=True),
+        "3": lambda: show_search(shodan()),
+        "4": lambda: show_key_status(shodan(), state["source"]),
+        "5": harvester_search,
     }
     while True:
         print(MENU)

@@ -9,6 +9,20 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.3.0] - 2026-11
+
+### Afegit
+- Opció **5. Cerca OSINT amb The Harvester** al menú de l'script de terminal `sentinelx/shodan_recon.py`:
+  demana el domini objectiu i la font de dades (google, bing, linkedin o all), construeix la comanda
+  `theHarvester -d <domini> -b <font> -l 500` i la llança amb `subprocess`. Opcionalment desa els
+  resultats en un fitxer (paràmetre `-f`). Cal tenir The Harvester instal·lat
+  (https://github.com/laramies/theHarvester).
+- Si la versió instal·lada de The Harvester no té la font triada (la 5.0.0 ja no inclou google, bing
+  ni linkedin), l'script ho avisa i torna a preguntar.
+
+### Canviat
+- L'script de terminal només demana la clau de Shodan quan es tria una opció de Shodan.
+
 ## [2.2.0] - 2026-11
 
 ### Afegit
