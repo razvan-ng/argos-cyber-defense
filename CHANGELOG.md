@@ -9,6 +9,12 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.3.3] - 2026-11
+
+### Corregit
+- Pestanya OSINT: la comanda ocupa tota l'amplada i es veu sencera encara que la ruta del fitxer de
+  resultats sigui llarga, i el resum ja no canvia d'amplada en acabar la cerca.
+
 ## [2.3.2] - 2026-11
 
 ### Canviat

@@ -81,11 +81,12 @@ class OsintTab(ctk.CTkFrame):
         self.browse_btn = ctk.CTkButton(card, text="Tria...", width=80, command=self._browse, **outline)
         self.browse_btn.grid(row=3, column=5, sticky="w", padx=(0, 16), pady=4)
 
-        ctk.CTkLabel(card, text="Comanda:").grid(row=4, column=0, sticky="w", padx=(16, 8), pady=(4, 12))
+        # La comanda ocupa tota l'amplada perquè es vegi sencera, també amb rutes de fitxer llargues
+        ctk.CTkLabel(card, text="Comanda:").grid(row=4, column=0, sticky="w", padx=(16, 8), pady=4)
         self.command_entry = ctk.CTkEntry(card, font=(FONT_MONO_FAMILY, 12))
-        self.command_entry.grid(row=4, column=1, columnspan=3, sticky="ew", pady=(4, 12))
+        self.command_entry.grid(row=4, column=1, columnspan=5, sticky="ew", padx=(0, 16), pady=4)
         buttons = ctk.CTkFrame(card, fg_color="transparent")
-        buttons.grid(row=4, column=4, columnspan=2, sticky="e", padx=(8, 16), pady=(4, 12))
+        buttons.grid(row=5, column=0, columnspan=6, sticky="e", padx=16, pady=(4, 12))
         self.run_btn = ctk.CTkButton(buttons, text="Llança The Harvester", width=170, command=self._run, **accent)
         self.run_btn.pack(side="left")
         self.stop_btn = ctk.CTkButton(buttons, text="Atura", width=80, command=self._stop, state="disabled", **outline)
@@ -101,8 +102,8 @@ class OsintTab(ctk.CTkFrame):
 
         results = ctk.CTkFrame(self, fg_color="transparent")
         results.pack(fill="both", expand=True, padx=12)
-        results.grid_columnconfigure(0, weight=3)
-        results.grid_columnconfigure(1, weight=1)
+        results.grid_columnconfigure(0, weight=1)
+        results.grid_columnconfigure(1, weight=0, minsize=330)  # amplada fixa: no es mou en mostrar el resum
         results.grid_rowconfigure(0, weight=1)
         self.log_console = LogConsole(results)
         self.log_console.grid(row=0, column=0, sticky="nsew", padx=(0, 6))
@@ -116,7 +117,7 @@ class OsintTab(ctk.CTkFrame):
         self.tree.column("tipus", width=170, anchor="w")
         self.tree.column("nombre", width=70, anchor="e")
         self.tree.pack(fill="both", expand=True, padx=6, pady=(0, 6))
-        self.files_label = ctk.CTkLabel(summary, text="", anchor="w", justify="left", wraplength=260,
+        self.files_label = ctk.CTkLabel(summary, text="", anchor="w", justify="left", wraplength=310,
                                         text_color=COLOR_TEXT_MUTED)
         self.files_label.pack(fill="x", padx=10, pady=(0, 8))
 
@@ -232,7 +233,7 @@ class OsintTab(ctk.CTkFrame):
         if self._files and os.path.exists(self._files[1]):
             folder = os.path.dirname(os.path.abspath(self._files[1])).replace(os.path.expanduser("~"), "~", 1)
             names = "\n".join(os.path.basename(f) for f in self._files)
-            self.files_label.configure(text=f"Desat a {folder}:\n{names}")
+            self.files_label.configure(text=f"Desat a la carpeta {folder}\n{names}")
         self.log_console.log(f"[*] The Harvester ha acabat (codi de sortida {code}).")
         if code == 0:
             total = sum(count for _label, count in rows)
