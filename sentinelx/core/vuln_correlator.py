@@ -57,6 +57,10 @@ class VulnerabilityCorrelator:
         except (OSError, json.JSONDecodeError):
             return []
 
+    def is_local_text(self, vuln):
+        """Les descripcions del diccionari local i dels protocols de risc ja són en català."""
+        return vuln.cve_id == "N/A" or any(entry.get("cve_id") == vuln.cve_id for entry in self.local_db)
+
     def correlate_service(self, service, on_log=None):
         findings = []
         product = (service.product or service.service_name or "").lower()
@@ -81,7 +85,8 @@ class VulnerabilityCorrelator:
         # Sense versió, la cerca per paraula clau a la NVD (p. ex. només «ssh») retorna CVE de qualsevol
         # època que no tenen res a veure amb el servei; com al diccionari local, cal conèixer la versió.
         if self.use_online and product and version:
-            findings.extend(self._query_nvd(product, version, on_log))
+            known = {v.cve_id for v in findings}  # el diccionari local té prioritat (text en català)
+            findings.extend(v for v in self._query_nvd(product, version, on_log) if v.cve_id not in known)
 
         if self.exploit_intel.is_available():
             for vuln in findings:
@@ -151,8 +156,10 @@ class VulnerabilityCorrelator:
     def _vulnerability_from_nvd_item(item):
         cve = item.get("cve", {})
         cve_id = cve.get("id", "")
-        descriptions = cve.get("descriptions", [])
-        description = next((d["value"] for d in descriptions if d.get("lang") == "en"), "")
+        # La NVD també publica moltes descripcions en castellà: es fan servir abans que l'anglès
+        # (si l'assistent d'IA està configurat, la pestanya les tradueix després al català).
+        descriptions = {d.get("lang"): d.get("value", "") for d in cve.get("descriptions", [])}
+        description = descriptions.get("es") or descriptions.get("en") or ""
         cvss_score, severity = VulnerabilityCorrelator._extract_cvss(cve.get("metrics", {}))
         references = cve.get("references", [])
         ref_url = references[0]["url"] if references else f"https://nvd.nist.gov/vuln/detail/{cve_id}"
@@ -180,9 +187,11 @@ class VulnerabilityCorrelator:
         match = _CVE_RE.search(output)
         cve_id = match.group(0).upper() if match else f"NSE:{finding.get('script_id', 'desconegut')}"
         script_id = finding.get("script_id", "")
+        detail = " ".join(line.strip(" |_") for line in output.splitlines() if line.strip(" |_"))
         return Vulnerability(
             cve_id=cve_id,
-            description=output[:600],
+            description=f"Confirmada activament per l'script NSE «{script_id or 'desconegut'}» de nmap. "
+                        f"Sortida de l'script: {detail[:520]}",
             severity=Severity.HIGH,
             cvss_score=None,
             reference_url=f"https://nmap.org/nsedoc/scripts/{script_id}.html" if script_id else "",

@@ -2,14 +2,15 @@
 import customtkinter as ctk
 
 from core.dependency_check import build_install_command, run_health_check, run_optional_check
+from gui.theme import COLOR_ACCENT, COLOR_ACCENT_HOVER, COLOR_PRIMARY_DARK
 
 
 class DependencyDialog(ctk.CTkToplevel):
     def __init__(self, master, on_continue=None):
         super().__init__(master)
         self.title("Comprovació de Dependències del Sistema")
-        self.geometry("600x480")
-        self.resizable(False, False)
+        self.geometry("640x560")
+        self.minsize(560, 420)
         self.on_continue = on_continue
         self.transient(master)
         self.grab_set()
@@ -23,29 +24,29 @@ class DependencyDialog(ctk.CTkToplevel):
             text_color="#5B6472",
         ).pack(pady=(0, 12))
 
-        self.status_frame = ctk.CTkScrollableFrame(self, width=540, height=220)
-        self.status_frame.pack(padx=20, pady=4, fill="both", expand=True)
+        # Els botons es col·loquen primer, a baix, perquè no quedin mai fora de la finestra: si falta
+        # espai (llista d'eines llarga, avisos o pantalles amb escalat), s'encongeix la llista.
+        button_frame = ctk.CTkFrame(self, fg_color="transparent")
+        button_frame.pack(side="bottom", pady=(6, 16))
+        ctk.CTkButton(
+            button_frame, text="Tornar a comprovar", command=self._recheck, fg_color="transparent",
+            border_width=1, border_color=COLOR_PRIMARY_DARK, text_color=COLOR_PRIMARY_DARK,
+        ).grid(row=0, column=0, padx=8)
+        ctk.CTkButton(
+            button_frame, text="Continuar", command=self._continue,
+            fg_color=COLOR_ACCENT, hover_color=COLOR_ACCENT_HOVER, text_color=COLOR_PRIMARY_DARK,
+        ).grid(row=0, column=1, padx=8)
 
-        self.warning_label = ctk.CTkLabel(self, text="", text_color="#C62828", wraplength=540, justify="left")
-        self.warning_label.pack(padx=20, pady=(8, 4), fill="x")
-
+        # També de baix a dalt: la comanda d'instal·lació i l'avís, i la llista d'eines omple el que queda
         self.install_box = ctk.CTkTextbox(self, height=56, font=("Consolas", 11))
-        self.install_box.pack(padx=20, pady=(0, 8), fill="x")
+        self.install_box.pack(side="bottom", padx=20, pady=(0, 4), fill="x")
         self.install_box.configure(state="disabled")
 
-        button_frame = ctk.CTkFrame(self, fg_color="transparent")
-        button_frame.pack(pady=14)
+        self.warning_label = ctk.CTkLabel(self, text="", text_color="#C62828", wraplength=540, justify="left")
+        self.warning_label.pack(side="bottom", padx=20, pady=(8, 4), fill="x")
 
-        ctk.CTkButton(button_frame, text="Tornar a comprovar", command=self._recheck).grid(
-            row=0, column=0, padx=8
-        )
-        ctk.CTkButton(
-            button_frame,
-            text="Continuar",
-            command=self._continue,
-            fg_color="#2E7D32",
-            hover_color="#1B5E20",
-        ).grid(row=0, column=1, padx=8)
+        self.status_frame = ctk.CTkScrollableFrame(self, width=540, height=150)
+        self.status_frame.pack(padx=20, pady=4, fill="both", expand=True)
 
         self._recheck()
 

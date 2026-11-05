@@ -52,7 +52,8 @@ realitzar auditories tècniques completes:
      directament contra un objectiu, que confirmen la troballa interactuant amb el servei real.
    La taula de resultats es pot filtrar en temps real per IP, servei, CVE, gravetat o text lliure.
 5. **Generador d'Informes** — exportació a HTML, PDF, JSON i CSV amb resum executiu, matriu de
-   troballes, reforçament del sistema local i pla de millora.
+   troballes, reforçament del sistema local i pla de millora, i **informe senzill per a l'empresa**
+   redactat amb l'assistent d'IA (vegeu l'apartat 10).
 6. **Sessions d'auditoria** — desar i carregar l'estat complet d'una auditoria en JSON, i
    **comparar-lo amb una auditoria anterior (baseline)** per detectar equips, ports o
    vulnerabilitats nous des de l'última revisió.
@@ -174,6 +175,7 @@ sentinelx/
 │   ├── exploit_intel.py          # Consulta d'exploits coneguts (searchsploit)
 │   ├── shodan_intel.py           # Reconeixement passiu amb l'API de Shodan
 │   ├── harvester.py              # Cerca OSINT amb The Harvester (comanda i subprocess)
+│   ├── ai_assistant.py           # Assistent d'IA (Gemini): traducció, explicacions i informe per a l'empresa
 │   ├── report_generator.py       # Generació d'informes HTML/PDF/JSON/CSV
 │   ├── portal_client.py          # Connexió amb el portal (sessió, expedients, auditories)
 │   ├── tls.py                    # Completa la cadena de certificats si el hosting no l'envia
@@ -428,3 +430,32 @@ theHarvester -d iesebre.cat -b all -l 500 -f resultats
 - **google** i **bing** s'han retirat de The Harvester (la 4.11.1 no les té): SentinelX ho avisa i
   proposa **all** (totes les fonts) o **linkedin**. Algunes fonts de «all» necessiten claus d'API
   (`~/.theHarvester/api-keys.yaml`); sense clau, The Harvester se les salta.
+
+## 10. Assistent d'IA (Google Gemini)
+
+SentinelX pot fer servir [Gemini](https://ai.google.dev) per fer les auditories entenedores per a
+persones sense coneixements tècnics:
+
+- **Informe senzill per a l'empresa** (pestanya Informes): PDF per a la direcció amb el nivell de risc,
+  un resum, els riscos principals explicats sense tecnicismes (què passa, què podria passar, urgència i
+  què cal fer), recomanacions i glossari.
+- **Explica amb IA** (pestanya Vulnerabilitats i CVE, o doble clic sobre una troballa): què és, quin
+  risc té per a l'empresa i què cal fer.
+- **Traducció al català** de les descripcions de la NVD i dels scripts NSE. Sense IA, les de la NVD es
+  mostren en castellà quan n'hi ha traducció.
+
+### Configuració
+
+1. Creeu una clau a [aistudio.google.com/apikey](https://aistudio.google.com/apikey). Si Google respon
+   que el pla gratuït no està disponible per al projecte, cal activar-hi la facturació
+   ([aistudio.google.com/billing](https://aistudio.google.com/billing)) o fer servir un altre projecte.
+2. Pestanya **Informes** → apartat «Informe senzill per a l'empresa» → enganxeu la clau, **Desa** i
+   **Comprova**. Es desa a `~/.config/sentinelx/ia.json` (permisos `600`); la variable d'entorn
+   `GEMINI_API_KEY` té prioritat. El model per defecte és `gemini-flash-latest`.
+
+### Privacitat
+
+Les dades de l'auditoria s'envien a Google. Amb l'opció **Amaga les IP i els noms dels equips**
+(activada per defecte), SentinelX hi envia àlies («Equip 1», «la xarxa auditada») i torna a posar les
+dades reals a la resposta. Els textos de la IA s'han de revisar abans d'entregar-los al client: l'informe
+i les explicacions ho indiquen.

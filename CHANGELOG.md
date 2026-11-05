@@ -9,6 +9,30 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.4.0] - 2026-11
+
+### Afegit
+- **Assistent d'IA (Google Gemini)**, configurable a la pestanya Informes (la clau es desa al perfil de
+  l'usuari, `ia.json` amb permisos 600, o a la variable d'entorn `GEMINI_API_KEY`):
+  - **Informe senzill per a l'empresa** (PDF): nivell de risc, resum per a la direcció, riscos
+    principals explicats sense tecnicismes amb la urgència i què cal fer, recomanacions i glossari.
+  - **Explica amb IA** (o doble clic) a la pestanya Vulnerabilitats i CVE: què és la troballa, quin
+    risc té per a l'empresa i què cal fer, en llenguatge senzill.
+  - **Traducció al català** de les descripcions que arriben en anglès o castellà (NVD i scripts NSE).
+  - Opció (activada per defecte) per amagar les IP i els noms dels equips abans d'enviar les dades a
+    Google: s'envien àlies («Equip 1») i es tornen a posar a la resposta.
+
+### Canviat
+- Les descripcions de la NVD es mostren en castellà quan la NVD en té la traducció, en lloc de
+  l'anglès. Les dels scripts NSE porten l'explicació en català.
+- Si un CVE ja és al diccionari local, no es torna a afegir des de la NVD (sortia repetit).
+
+### Corregit
+- La finestra de comprovació d'eines que surt en obrir SentinelX tallava els botons «Tornar a
+  comprovar» i «Continuar» (mida fixa de 600×480). Ara els botons sempre es veuen, la finestra és
+  més gran i es pot redimensionar.
+- La barra de progrés de la pestanya Vulnerabilitats ja no queda mig pintada en repòs.
+
 ## [2.3.3] - 2026-11
 
 ### Corregit

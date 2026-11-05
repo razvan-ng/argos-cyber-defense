@@ -1,15 +1,18 @@
 """Pestanya del Generador d'Informes i Pla de Millora."""
 import os
+import threading
 import webbrowser
 from tkinter import filedialog, messagebox
 from urllib.parse import urlparse
 
 import customtkinter as ctk
 
+from core.ai_assistant import AIAssistant, AIError, Anonymizer, delete_api_key, load_config, mask_key, save_config
 from core.report_generator import ReportGenerator
 from core.session_io import compare_sessions, load_session, save_session
 from gui.theme import (
-    APP_NAME, APP_VERSION, COLOR_ACCENT, COLOR_ACCENT_HOVER, COLOR_PRIMARY_DARK, COMPANY_NAME, PORTAL_URL,
+    APP_NAME, APP_VERSION, COLOR_ACCENT, COLOR_ACCENT_HOVER, COLOR_BORDER, COLOR_DANGER, COLOR_PRIMARY_DARK,
+    COLOR_SUCCESS, COLOR_TEXT_MUTED, COMPANY_NAME, PORTAL_URL,
 )
 from gui.widgets.diff_dialog import DiffDialog
 
@@ -48,6 +51,8 @@ class ReportTab(ctk.CTkFrame):
         ctk.CTkButton(export_frame, text="JSON", command=self._export_json, width=100).grid(row=1, column=2, padx=6)
         ctk.CTkButton(export_frame, text="CSV", command=self._export_csv, width=100).grid(row=1, column=3, padx=6)
 
+        self._build_ai_section(frame)
+
         session_frame = ctk.CTkFrame(frame, fg_color="transparent")
         session_frame.pack(pady=(24, 8))
         ctk.CTkLabel(session_frame, text="Sessió d'auditoria:", font=("Segoe UI", 12, "bold")).grid(
@@ -83,6 +88,129 @@ class ReportTab(ctk.CTkFrame):
 
         self.status_label = ctk.CTkLabel(frame, text="", text_color="#2E7D32", wraplength=560)
         self.status_label.pack(pady=(20, 0))
+
+    # ------------------------------------------------------------------ #
+    # Assistent d'IA (Google Gemini): informe senzill per a l'empresa
+    # ------------------------------------------------------------------ #
+    def _build_ai_section(self, parent):
+        outline = {"fg_color": "transparent", "border_width": 1, "border_color": COLOR_PRIMARY_DARK,
+                   "text_color": COLOR_PRIMARY_DARK}
+        card = ctk.CTkFrame(parent, border_width=1, border_color=COLOR_BORDER)
+        card.pack(pady=(24, 8), padx=20, fill="x")
+        ctk.CTkLabel(card, text="Informe senzill per a l'empresa (assistent d'IA)", font=("Segoe UI", 13, "bold"),
+                     text_color=COLOR_PRIMARY_DARK).pack(anchor="w", padx=16, pady=(12, 2))
+        ctk.CTkLabel(
+            card, text="Google Gemini redacta un informe sense tecnicismes per a la direcció de l'empresa (nivell de "
+            "risc, riscos principals, què cal fer i glossari) i, a la pestanya Vulnerabilitats, tradueix les "
+            "descripcions al català i explica cada troballa.", text_color=COLOR_TEXT_MUTED, wraplength=640,
+            justify="left",
+        ).pack(anchor="w", padx=16)
+
+        key_row = ctk.CTkFrame(card, fg_color="transparent")
+        key_row.pack(fill="x", padx=16, pady=(10, 2))
+        ctk.CTkLabel(key_row, text="Clau de Gemini:").pack(side="left")
+        self.ai_key_entry = ctk.CTkEntry(key_row, width=260, show="•", placeholder_text="Enganxeu aquí la clau de l'API")
+        self.ai_key_entry.pack(side="left", padx=8)
+        ctk.CTkButton(key_row, text="Desa", width=70, command=self._save_ai_key).pack(side="left")
+        self.ai_check_btn = ctk.CTkButton(key_row, text="Comprova", width=90, command=self._check_ai, **outline)
+        self.ai_check_btn.pack(side="left", padx=8)
+        ctk.CTkButton(key_row, text="Esborra", width=80, command=self._delete_ai_key, **outline).pack(side="left")
+
+        self.anonymize_var = ctk.BooleanVar(value=load_config()["anonymize"])
+        ctk.CTkCheckBox(card, text="Amaga les IP i els noms dels equips quan s'envien les dades a la IA",
+                        variable=self.anonymize_var, command=lambda: save_config(anonymize=self.anonymize_var.get())
+                        ).pack(anchor="w", padx=16, pady=(8, 2))
+        self.ai_status = ctk.CTkLabel(card, text="", anchor="w", justify="left", wraplength=640)
+        self.ai_status.pack(anchor="w", padx=16, pady=(2, 4))
+
+        self.company_btn = ctk.CTkButton(
+            card, text="Genera l'informe per a l'empresa (PDF)", width=300, command=self._export_company_report,
+            fg_color=COLOR_ACCENT, hover_color=COLOR_ACCENT_HOVER, text_color=COLOR_PRIMARY_DARK,
+        )
+        self.company_btn.pack(pady=(4, 14))
+        self._refresh_ai_status()
+
+    def _refresh_ai_status(self, text="", color=None):
+        config = load_config()
+        if text:
+            self.ai_status.configure(text=text, text_color=color or COLOR_TEXT_MUTED)
+        elif config["api_key"]:
+            origin = "variable d'entorn GEMINI_API_KEY" if config["source"] == "entorn" else "perfil de l'usuari, permisos 600"
+            self.ai_status.configure(text=f"Clau desada ({mask_key(config['api_key'])}, {origin}). Model: {config['model']}.",
+                                     text_color=COLOR_TEXT_MUTED)
+        else:
+            self.ai_status.configure(text="No hi ha cap clau. Creeu-ne una a https://aistudio.google.com/apikey: es desa "
+                                     "al perfil de l'usuari, mai al codi ni a l'expedient.", text_color=COLOR_DANGER)
+
+    def _save_ai_key(self):
+        key = self.ai_key_entry.get().strip()
+        if not key:
+            messagebox.showwarning("Falta la clau", "Enganxeu la clau de l'API de Gemini abans de desar-la.")
+            return
+        save_config(api_key=key)
+        self.ai_key_entry.delete(0, "end")
+        self._refresh_ai_status()
+        self._check_ai()
+
+    def _delete_ai_key(self):
+        if messagebox.askyesno("Esborra la clau", "Voleu esborrar la clau de Gemini desada en aquest equip?"):
+            delete_api_key()
+            self._refresh_ai_status()
+
+    def _check_ai(self):
+        self.ai_check_btn.configure(state="disabled")
+        self._refresh_ai_status("Comprovant la clau amb Gemini...")
+
+        def worker():
+            try:
+                model = AIAssistant().check()
+                done = (f"La clau funciona: Gemini ({model}) respon correctament.", COLOR_SUCCESS)
+            except AIError as exc:
+                done = (str(exc), COLOR_DANGER)
+            self.after(0, lambda: (self.ai_check_btn.configure(state="normal"), self._refresh_ai_status(*done)))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _export_company_report(self):
+        if not self.app_state.has_results():
+            messagebox.showinfo("Sense resultats", "Primer cal fer l'auditoria: no hi ha cap equip ni troballa.")
+            return
+        path = filedialog.asksaveasfilename(
+            defaultextension=".pdf", filetypes=[("Fitxer PDF", "*.pdf")], initialfile="informe_empresa.pdf"
+        )
+        if not path:
+            return
+        generator = self._get_generator()
+        expedient = self.app_state.active_expedient or {}
+        client = (expedient.get("empresa") or {}).get("nom", "")
+        session, anonymize = self.app_state.session, self.anonymize_var.get()
+        self.company_btn.configure(state="disabled", text="Gemini està redactant l'informe...")
+        self._refresh_ai_status("Gemini està redactant l'informe senzill (pot trigar uns segons)...")
+
+        def worker():
+            try:
+                report = AIAssistant().company_report(session, client, Anonymizer(session, enabled=anonymize))
+                generator.generate_company_pdf(report, path, client)
+            except AIError as exc:
+                self.after(0, lambda msg=str(exc): self._company_report_done(None, msg))
+                return
+            except Exception as exc:  # noqa: BLE001 - p. ex. un error en escriure el PDF
+                self.after(0, lambda msg=f"No s'ha pogut generar el PDF: {exc}": self._company_report_done(None, msg))
+                return
+            self.after(0, lambda: self._company_report_done(path, ""))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _company_report_done(self, path, error):
+        self.company_btn.configure(state="normal", text="Genera l'informe per a l'empresa (PDF)")
+        if error:
+            self._refresh_ai_status(error, COLOR_DANGER)
+            messagebox.showerror("Assistent d'IA", error)
+            return
+        self._refresh_ai_status(f"Informe per a l'empresa generat: {path}", COLOR_SUCCESS)
+        self._set_status(f"Informe per a l'empresa generat: {path}")
+        if messagebox.askyesno("Obrir informe", "Vols obrir l'informe generat ara mateix?"):
+            webbrowser.open(f"file://{os.path.abspath(path)}")
 
     def set_target(self, target):
         self.target_entry.delete(0, "end")

@@ -9,6 +9,17 @@ import datetime
 
 from core.models import Severity
 from core.shodan_intel import SHODAN_STATE
+from utils.resources import resource_path
+
+COMPANY_LOGO = "data/logo/argos-logo-horitzontal_1200px.png"
+RISK_COLORS = {"Baix": "#2E7D32", "Moderat": "#B7791F", "Alt": "#C62828", "Crític": "#7B0000"}
+URGENCY_COLORS = {"Immediata": "#C62828", "Aquest mes": "#B7791F", "Planificada": "#0F6F8A"}
+AI_REPORT_NOTE = (
+    "Aquest informe resumeix l'auditoria en llenguatge senzill per a la direcció de l'empresa. El text s'ha "
+    "redactat amb un assistent d'intel·ligència artificial (Google Gemini) a partir dels resultats tècnics de "
+    "SentinelX i l'ha de revisar l'equip auditor abans d'entregar-lo. El detall de cada troballa és a "
+    "l'informe tècnic complet."
+)
 
 SEVERITY_COLORS = {
     Severity.CRITICAL: "#7B0000",
@@ -292,6 +303,111 @@ class ReportGenerator:
         for item in IMPROVEMENT_PLAN:
             story.append(Paragraph(f"• {item}", normal_style))
 
+        doc.build(story)
+        return output_path
+
+    # ------------------------------------------------------------------ #
+    # Informe senzill per a l'empresa (redactat per l'assistent d'IA)
+    # ------------------------------------------------------------------ #
+    def generate_company_pdf(self, ai_report, output_path, client_name=""):
+        """PDF per a la direcció de l'empresa client a partir de AIAssistant.company_report()."""
+        from xml.sax.saxutils import escape
+
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import mm
+        from reportlab.platypus import Image, KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+        navy, cyan, muted = colors.HexColor("#0B1F3A"), colors.HexColor("#16B4D2"), colors.HexColor("#4A5869")
+        styles = getSampleStyleSheet()
+        body = ParagraphStyle("Cos", parent=styles["BodyText"], fontSize=10.5, leading=15)
+        small = ParagraphStyle("Petit", parent=body, fontSize=8.5, leading=12, textColor=muted)
+        title = ParagraphStyle("Titol", parent=styles["Title"], fontSize=21, leading=26, textColor=navy, alignment=0)
+        heading = ParagraphStyle("Apartat", parent=styles["Heading2"], fontSize=14, textColor=navy, spaceBefore=14)
+        label = ParagraphStyle("Etiqueta", parent=body, fontSize=8, leading=10, textColor=muted)
+        white = ParagraphStyle("Blanc", parent=body, textColor=colors.white, fontName="Helvetica-Bold")
+        number = ParagraphStyle("Xifra", parent=body, fontSize=18, leading=22, textColor=navy, fontName="Helvetica-Bold")
+        white_number = ParagraphStyle("XifraBlanca", parent=number, textColor=colors.white)
+        white_label = ParagraphStyle("EtiquetaBlanca", parent=label, textColor=colors.white)
+        para = lambda text, style=body: Paragraph(escape(str(text)), style)  # noqa: E731
+
+        findings = self._collect_findings()
+        counts = self._summary_counts(findings)
+        urgent = counts.get(Severity.CRITICAL, 0) + counts.get(Severity.HIGH, 0)
+        level = ai_report.get("nivell_risc", "Moderat")
+        now = datetime.datetime.now().strftime("%d/%m/%Y")
+
+        story = []
+        try:
+            story.append(Image(resource_path(COMPANY_LOGO), width=55 * mm, height=20 * mm, kind="proportional", hAlign="LEFT"))
+        except OSError:
+            pass  # sense logotip, l'informe es genera igualment
+        story += [
+            Spacer(1, 10),
+            Paragraph("Informe de seguretat per a la direcció", title),
+            para(f"{client_name or 'Empresa client'}, auditoria de {self.session.target or 'la xarxa'}, {now}", small),
+            Spacer(1, 12),
+        ]
+        cards = Table(
+            [[[para("NIVELL DE RISC", white_label), para(level, white_number)],
+              [para("EQUIPS ANALITZATS", label), para(len(self.session.hosts), number)],
+              [para("PROBLEMES TROBATS", label), para(len(findings), number)],
+              [para("CRÍTICS O GREUS", label), para(urgent, number)]]],
+            colWidths=[45 * mm, 40 * mm, 40 * mm, 40 * mm],
+        )
+        cards.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (0, 0), colors.HexColor(RISK_COLORS.get(level, "#B7791F"))),
+            ("BACKGROUND", (1, 0), (-1, 0), colors.HexColor("#F2F6FA")),
+            ("LINEABOVE", (1, 0), (-1, 0), 2, cyan),
+            ("TOPPADDING", (0, 0), (-1, -1), 8), ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ("LEFTPADDING", (0, 0), (-1, -1), 8), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ]))
+        story += [cards, Paragraph("Resum", heading), para(ai_report.get("resum", ""))]
+
+        if ai_report.get("punts_clau"):
+            story.append(Paragraph("Punts clau", heading))
+            story += [para(f"•  {point}") for point in ai_report["punts_clau"]]
+
+        if ai_report.get("riscos"):
+            story.append(Paragraph("Riscos principals i què cal fer", heading))
+            for index, risk in enumerate(ai_report["riscos"], start=1):
+                urgency = risk.get("urgencia", "Planificada")
+                rows = [
+                    [para(urgency, white), Paragraph(f"{index}. {escape(risk.get('titol', ''))}", white)],
+                    [para("Què passa", label), para(risk.get("explicacio", ""))],
+                    [para("Què podria passar", label), para(risk.get("impacte", ""))],
+                    [para("Què cal fer", label), para(risk.get("accio", ""))],
+                ]
+                if risk.get("equips"):
+                    rows.append([para("Equips afectats", label), para(", ".join(risk["equips"]))])
+                card = Table(rows, colWidths=[38 * mm, 127 * mm])
+                card.setStyle(TableStyle([
+                    ("BACKGROUND", (0, 0), (0, 0), colors.HexColor(URGENCY_COLORS.get(urgency, "#0F6F8A"))),
+                    ("BACKGROUND", (1, 0), (1, 0), navy),
+                    ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#B7C4D1")),
+                    ("LINEBELOW", (0, 1), (-1, -2), 0.3, colors.HexColor("#D9E2EC")),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ]))
+                story += [KeepTogether([card]), Spacer(1, 8)]
+
+        if ai_report.get("recomanacions"):
+            story.append(Paragraph("Recomanacions generals", heading))
+            story += [para(f"•  {item}") for item in ai_report["recomanacions"]]
+
+        if ai_report.get("glossari"):
+            story.append(Paragraph("Glossari", heading))
+            glossary = Table([[Paragraph(f"<b>{escape(g['terme'])}</b>", body), para(g["definicio"])]
+                              for g in ai_report["glossari"]], colWidths=[38 * mm, 127 * mm])
+            glossary.setStyle(TableStyle([("LINEBELOW", (0, 0), (-1, -1), 0.3, colors.HexColor("#D9E2EC")),
+                                          ("VALIGN", (0, 0), (-1, -1), "TOP")]))
+            story.append(glossary)
+
+        story += [Spacer(1, 16), para(AI_REPORT_NOTE, small),
+                  para(f"{self.company_name}, {self.app_name} {self.app_version}", small)]
+        doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=16 * mm, bottomMargin=16 * mm,
+                                leftMargin=22 * mm, rightMargin=22 * mm, title="Informe de seguretat per a la direcció")
         doc.build(story)
         return output_path
 

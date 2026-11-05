@@ -25,7 +25,7 @@ GUIDE_STEPS = [
     "4. Sistema Local — audita el propi equip: processos, connexions, tallafocs i reforçament "
     "(actualitzacions pendents, binaris SUID/SGID, comptes de risc).",
     "5. Informes — genera l'informe final (HTML, PDF, JSON o CSV) amb el resum executiu, la "
-    "matriu de troballes i el pla de millora.",
+    "matriu de troballes i el pla de millora, i l'informe senzill per a l'empresa redactat amb IA.",
     "6. Expedients — compara els resultats amb l'auditoria anterior i desa o publica l'auditoria "
     "perquè el client la consulti a l'Àrea de clients de la web.",
 ]

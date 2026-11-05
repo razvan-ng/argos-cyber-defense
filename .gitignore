@@ -19,4 +19,5 @@ install_dependencies.log
 config.php
 portal.json
 shodan.json
+ia.json
 .env
