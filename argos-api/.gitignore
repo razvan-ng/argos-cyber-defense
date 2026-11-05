@@ -1,0 +1,4 @@
+node_modules/
+.wrangler/
+# Claus per a les proves locals (wrangler dev): no s'han de pujar mai
+.dev.vars

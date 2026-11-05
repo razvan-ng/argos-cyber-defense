@@ -176,6 +176,7 @@ sentinelx/
 │   ├── shodan_intel.py           # Reconeixement passiu amb l'API de Shodan
 │   ├── harvester.py              # Cerca OSINT amb The Harvester (comanda i subprocess)
 │   ├── ai_assistant.py           # Assistent d'IA (Gemini): traducció, explicacions i informe per a l'empresa
+│   ├── argos_api.py              # Client de l'API d'Argos (Gemini i Shodan sense clau de l'usuari)
 │   ├── report_generator.py       # Generació d'informes HTML/PDF/JSON/CSV
 │   ├── portal_client.py          # Connexió amb el portal (sessió, expedients, auditories)
 │   ├── tls.py                    # Completa la cadena de certificats si el hosting no l'envia
@@ -359,6 +360,9 @@ detecten res. Per això és la primera fase de l'auditoria, abans dels escanejos
 
 ### Clau de l'API
 
+Amb l'API d'Argos configurada (`api_url` a `data/branding.json`) **no cal cap clau**: les consultes
+es fan amb la clau de l'empresa a través del servidor d'Argos. Per fer servir una clau pròpia:
+
 1. Creeu un compte a [account.shodan.io](https://account.shodan.io) i copieu-hi la clau de l'API.
 2. Pestanya **Reconeixement passiu** → enganxeu la clau i premeu **Desa la clau**. Es desa a
    `~/.config/sentinelx/shodan.json` (Linux) o `%APPDATA%\SentinelX\shodan.json` (Windows), amb
@@ -445,6 +449,11 @@ persones sense coneixements tècnics:
   mostren en castellà quan n'hi ha traducció.
 
 ### Configuració
+
+**No cal cap clau** si SentinelX té configurada l'**API d'Argos** (camp `api_url` de
+[data/branding.json](data/branding.json), vegeu [`argos-api/`](../argos-api/README.md)): les consultes
+de Gemini i de Shodan es fan a través del servidor d'Argos, amb les claus de l'empresa. Una clau
+pròpia només cal si es vol fer servir la de l'usuari:
 
 1. Creeu una clau a [aistudio.google.com/apikey](https://aistudio.google.com/apikey). Si Google respon
    que el pla gratuït no està disponible per al projecte, cal activar-hi la facturació

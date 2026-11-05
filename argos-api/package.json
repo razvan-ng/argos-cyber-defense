@@ -1,0 +1,12 @@
+{
+  "name": "argos-api",
+  "private": true,
+  "description": "API d'Argos: intermediari perquè SentinelX faci servir Gemini i Shodan sense que l'usuari posi cap clau",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.151.3"
+  }
+}

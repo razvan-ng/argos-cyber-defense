@@ -1,0 +1,22 @@
+# API d'Argos (Cloudflare Worker): fa d'intermediari entre SentinelX i Gemini / Shodan perquè
+# l'usuari no hagi de posar cap clau. Les claus són secrets de Cloudflare (no són en aquest fitxer):
+#   npx wrangler secret put GEMINI_API_KEY
+#   npx wrangler secret put SHODAN_API_KEY
+name = "argos-api"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# Límits per ordinador (adreça IP) i per minut, perquè ningú no pugui gastar les consultes de tothom
+[[ratelimits]]
+name = "LIMIT_IA"
+namespace_id = "1001"
+  [ratelimits.simple]
+  limit = 8
+  period = 60
+
+[[ratelimits]]
+name = "LIMIT_SHODAN"
+namespace_id = "1002"
+  [ratelimits.simple]
+  limit = 20
+  period = 60

@@ -11,7 +11,8 @@ Funcions (les fan servir la pestanya «Reconeixement passiu» i l'script shodan_
   3. Cerca de serveis específics: equips d'Internet amb un producte o servei (p. ex. «proftpd»).
 
 La clau de l'API no s'escriu mai al codi: es llegeix de la variable d'entorn SHODAN_API_KEY o
-del fitxer shodan.json del perfil de l'usuari (permisos 600, al costat de portal.json).
+del fitxer shodan.json del perfil de l'usuari (permisos 600, al costat de portal.json). Si l'usuari
+no en té cap, les consultes passen per l'API d'Argos (core/argos_api.py), amb la clau de l'empresa.
 Es fa servir la llibreria oficial de Shodan (pip install shodan).
 """
 import ipaddress
@@ -21,6 +22,7 @@ import re
 import socket
 import time
 
+from core import argos_api
 from core.models import HostResult, ServiceInfo
 from core.portal_client import settings_path as portal_settings_path
 
@@ -183,8 +185,39 @@ def _banner_line(raw):
 # ------------------------------------------------------------------ #
 # Consultes a l'API
 # ------------------------------------------------------------------ #
+class ArgosShodan:
+    """Les mateixes consultes que la llibreria oficial, però a través de l'API d'Argos (sense clau)."""
+
+    api_key = ""
+
+    def info(self):
+        return argos_api.post("/v1/shodan", {"accio": "info"})
+
+    def host(self, ip):
+        return argos_api.post("/v1/shodan", {"accio": "host", "ip": ip})
+
+    def search(self, query, limit=None):
+        result = argos_api.post("/v1/shodan", {"accio": "search", "query": query})
+        if limit:
+            result["matches"] = (result.get("matches") or [])[:limit]
+        return result
+
+    def count(self, query, facets=None):
+        facets = ",".join(f"{name}:{size}" for name, size in (facets or []))
+        return argos_api.post("/v1/shodan", {"accio": "count", "query": query, "facets": facets})
+
+
+def available():
+    """Es poden fer consultes: amb la clau i la llibreria de l'usuari o a través de l'API d'Argos."""
+    return bool(load_api_key()[0] and library_available()) or argos_api.available()
+
+
 class ShodanRecon:
     def __init__(self, api_key):
+        self.via_argos = not api_key and argos_api.available()
+        if self.via_argos:
+            self.api = ArgosShodan()
+            return
         if shodan is None:
             raise ShodanError(
                 "Falta la llibreria de Shodan. Instal·leu-la amb ./install_dependencies.sh "
@@ -270,8 +303,12 @@ class ShodanRecon:
     def _call(func, *args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except shodan.APIError as exc:
-            raise _translate_error(str(exc)) from exc
+        except argos_api.ArgosAPIError as exc:
+            raise (ShodanError(str(exc)) if exc.own else _translate_error(str(exc))) from exc
+        except Exception as exc:
+            if shodan is not None and isinstance(exc, shodan.APIError):
+                raise _translate_error(str(exc)) from exc
+            raise
 
 
 def _translate_error(message):
@@ -282,7 +319,7 @@ def _translate_error(message):
         )
     if "invalid api key" in text or "401" in text:
         return ShodanError("La clau de l'API de Shodan no és vàlida. Reviseu-la a https://account.shodan.io.")
-    if "access denied" in text or "403" in text:
+    if "access denied" in text or "403" in text or "requires membership" in text:
         return ShodanPlanError(
             "El pla de la clau de Shodan no permet aquesta consulta: la cerca amb resultats necessita "
             "crèdits de consulta (Shodan Membership o pla acadèmic)."

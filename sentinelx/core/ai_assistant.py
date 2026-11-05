@@ -8,7 +8,8 @@ Fa tres coses:
 
 Es fa servir l'API REST de Gemini (https://ai.google.dev) amb requests, sense dependències noves.
 La clau es llegeix de la variable d'entorn GEMINI_API_KEY o del fitxer ia.json del perfil de
-l'usuari (permisos 600), mai del codi. Abans d'enviar res, les IP i els noms dels equips es poden
+l'usuari (permisos 600), mai del codi. Si l'usuari no en té cap, les consultes passen per l'API
+d'Argos (core/argos_api.py), que fa servir la clau de l'empresa. Abans d'enviar res, les IP i els noms dels equips es poden
 substituir per àlies («Equip 1»...) i es tornen a posar en rebre la resposta.
 """
 import json
@@ -17,6 +18,7 @@ import re
 
 import requests
 
+from core import argos_api
 from core.models import Severity
 from core.portal_client import settings_path as portal_settings_path
 
@@ -65,6 +67,8 @@ def load_config():
     env_key = os.environ.get(API_KEY_ENV, "").strip()
     if env_key:
         config.update(api_key=env_key, source="entorn")
+    elif not config["api_key"] and argos_api.available():
+        config["source"] = "argos"
     return config
 
 
@@ -104,7 +108,8 @@ def mask_key(key):
 
 
 def is_configured():
-    return bool(load_config()["api_key"])
+    """Hi ha IA disponible: amb la clau de l'usuari o a través de l'API d'Argos."""
+    return bool(load_config()["api_key"]) or argos_api.available()
 
 
 # ------------------------------------------------------------------ #
@@ -173,7 +178,8 @@ class AIAssistant:
         config = load_config()
         self.api_key = (api_key or config["api_key"]).strip()
         self.model = model or config["model"] or DEFAULT_MODEL
-        if not self.api_key:
+        self.via_argos = not self.api_key and argos_api.available()
+        if not self.api_key and not self.via_argos:
             raise AIError("Falta la clau de l'API de Gemini. Creeu-ne una a https://aistudio.google.com/apikey "
                           "i deseu-la a la pestanya Informes.")
 
@@ -292,15 +298,32 @@ class AIAssistant:
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
             "generationConfig": {"temperature": temperature, "responseMimeType": "application/json"},
         }
+        if self.via_argos:
+            try:
+                data = argos_api.post("/v1/gemini", {"model": self.model, **body})
+            except argos_api.ArgosAPIError as exc:
+                if not exc.own and ("free tier is not available" in str(exc) or "billing" in str(exc).lower()):
+                    raise AIError("L'API d'Argos no pot fer servir Gemini: cal activar la facturació al projecte de "
+                                  "Google de la clau de l'empresa.") from exc
+                raise (AIError(str(exc)) if exc.own else _http_error(exc.status, str(exc))) from exc
+        else:
+            try:
+                response = requests.post(API_URL.format(model=self.model), json=body, timeout=TIMEOUT,
+                                         headers={"x-goog-api-key": self.api_key})
+            except requests.exceptions.RequestException as exc:
+                raise AIError(f"No s'ha pogut connectar amb Gemini. Comproveu la connexió a Internet ({exc}).") from exc
+            if not response.ok:
+                try:
+                    detail = response.json().get("error", {}).get("message", "")
+                except ValueError:
+                    detail = ""
+                raise _http_error(response.status_code, detail)
+            try:
+                data = response.json()
+            except ValueError as exc:
+                raise AIError("Gemini ha retornat una resposta inesperada.") from exc
         try:
-            response = requests.post(API_URL.format(model=self.model), json=body, timeout=TIMEOUT,
-                                     headers={"x-goog-api-key": self.api_key})
-        except requests.exceptions.RequestException as exc:
-            raise AIError(f"No s'ha pogut connectar amb Gemini. Comproveu la connexió a Internet ({exc}).") from exc
-        if not response.ok:
-            raise _http_error(response)
-        try:
-            candidate = response.json()["candidates"][0]
+            candidate = data["candidates"][0]
             text = "".join(part.get("text", "") for part in candidate["content"]["parts"])
         except (ValueError, KeyError, IndexError, TypeError) as exc:
             raise AIError("Gemini no ha retornat cap resposta (pot ser que l'hagi bloquejat el seu filtre).") from exc
@@ -316,12 +339,7 @@ def _strip_fences(text):
     return match.group(1) if match else text
 
 
-def _http_error(response):
-    try:
-        detail = response.json().get("error", {}).get("message", "")
-    except ValueError:
-        detail = ""
-    code = response.status_code
+def _http_error(code, detail):
     if "free tier is not available" in detail or "billing" in detail.lower():
         return AIError("La clau és vàlida, però el pla gratuït de Gemini no està disponible per al projecte de "
                        "Google d'aquesta clau. Activeu-hi la facturació a https://aistudio.google.com/billing o "

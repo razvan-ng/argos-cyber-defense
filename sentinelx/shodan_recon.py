@@ -25,6 +25,7 @@ from core.shodan_intel import (
     SEARCH_LIMITS, ShodanError, ShodanRecon, api_key_path, library_available, load_api_key, mask_key,
     save_api_key, service_label,
 )
+from core import argos_api
 
 LINE = "=" * 60
 MENU = """
@@ -42,6 +43,8 @@ def ask_api_key():
     key, source = load_api_key()
     if key:
         return key, source
+    if argos_api.available():
+        return "", "argos"  # sense clau pròpia: l'API d'Argos fa les consultes amb la clau de l'empresa
     print("No hi ha cap clau de l'API de Shodan configurada (la trobareu a https://account.shodan.io).")
     key = getpass.getpass("Clau de l'API (no es mostra en escriure-la): ").strip()
     if key and input("Voleu desar-la al perfil de l'usuari per a la propera vegada? [s/N] ").strip().lower() == "s":
@@ -92,8 +95,11 @@ def show_search(recon):
 
 def show_key_status(recon, source):
     info = recon.account_info()
-    origin = {"entorn": "variable d'entorn SHODAN_API_KEY", "fitxer": api_key_path()}.get(source, "introduïda ara")
-    print(f"\nClau {mask_key(recon.api.api_key)} ({origin})")
+    if recon.via_argos:
+        print("\nSense clau pròpia: les consultes es fan a través de l'API d'Argos.")
+    else:
+        origin = {"entorn": "variable d'entorn SHODAN_API_KEY", "fitxer": api_key_path()}.get(source, "introduïda ara")
+        print(f"\nClau {mask_key(recon.api.api_key)} ({origin})")
     print(f"Pla: {info['plan']}. Crèdits de consulta: {info['query_credits']}. Crèdits d'escaneig: {info['scan_credits']}.")
 
 
@@ -131,7 +137,7 @@ def main():
     def shodan():
         """Connecta amb Shodan només quan es tria una opció de Shodan."""
         if "recon" not in state:
-            if not library_available():
+            if not library_available() and not argos_api.available():
                 raise ShodanError("Falta la llibreria de Shodan: instal·leu-la amb «venv/bin/pip install shodan».")
             key, state["source"] = ask_api_key()
             state["recon"] = ShodanRecon(key)

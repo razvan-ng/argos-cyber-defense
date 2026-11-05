@@ -9,6 +9,20 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.5.0] - 2026-11
+
+### Afegit
+- **API d'Argos** (`argos-api/`, Cloudflare Workers): guarda les claus de Gemini i de Shodan de
+  l'empresa com a secrets i fa les consultes en nom de SentinelX. Els usuaris **ja no han de posar cap
+  clau**: si no en tenen de pròpia, l'assistent d'IA i el reconeixement amb Shodan passen per
+  `https://argos-api.argos-api.workers.dev` (camp `api_url` de `data/branding.json` o variable
+  `ARGOS_API_URL`). Només admet les peticions de SentinelX, amb un màxim de consultes per minut i
+  ordinador.
+
+### Canviat
+- Les claus pròpies de Gemini i de Shodan passen a ser opcionals: si l'usuari en desa una, es fa
+  servir la seva en lloc de la de l'API d'Argos.
+
 ## [2.4.0] - 2026-11
 
 ### Afegit

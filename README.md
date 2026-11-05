@@ -53,7 +53,7 @@ enviar cap paquet a l'objectiu), **cerca OSINT amb The Harvester** (correus, sub
 domini), descobriment d'equips i serveis amb nmap, auditoria i reforçament del sistema local, correlació de
 vulnerabilitats amb CVE (diccionari local, NVD API i scripts NSE), generació d'informes en
 HTML, PDF, JSON i CSV (i un **informe senzill per a l'empresa redactat amb IA**), **expedients i reauditories** connectats amb la web i publicació dels
-resultats a l'**Àrea de clients**. La versió actual és la **2.4.0** (vegeu el [registre de canvis](CHANGELOG.md)).
+resultats a l'**Àrea de clients**. La versió actual és la **2.5.0** (vegeu el [registre de canvis](CHANGELOG.md)).
 
 Inici ràpid a Ubuntu 24.04 / 26.04 LTS:
 
@@ -102,11 +102,18 @@ SentinelX i SentinelX n'exporta l'auditoria per pujar-la a la web.
 La comunicació directa es fa sempre per HTTPS amb sessions que caduquen; les auditories es desen
 xifrades (AES-256-GCM) i cada client només pot veure les publicades de la seva empresa.
 
+## API d'Argos
+
+[`argos-api/`](argos-api/README.md) és un servidor petit (Cloudflare Workers) que guarda les claus de
+Gemini i de Shodan de l'empresa i fa les consultes en nom de SentinelX, de manera que els usuaris no
+han de configurar cap clau.
+
 ## Estructura del repositori
 
 ```
 .
 ├── sentinelx/                  # Codi font de l'aplicació SentinelX (Python)
+├── argos-api/                  # API d'Argos (Cloudflare Workers): Gemini i Shodan sense clau de l'usuari
 ├── .github/workflows/
 │   └── release.yml             # Empaqueta SentinelX i crea una release a cada etiqueta vX.Y.Z
 ├── index.html, 404.html        # Redirecció de l'antiga adreça de GitHub Pages a argoscyberdefense.tech

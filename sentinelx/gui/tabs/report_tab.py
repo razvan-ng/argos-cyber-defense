@@ -134,6 +134,9 @@ class ReportTab(ctk.CTkFrame):
         config = load_config()
         if text:
             self.ai_status.configure(text=text, text_color=color or COLOR_TEXT_MUTED)
+        elif config["source"] == "argos":
+            self.ai_status.configure(text="No cal cap clau: la IA es fa servir a través de l'API d'Argos. Si en "
+                                     "teniu una de pròpia, la podeu desar aquí.", text_color=COLOR_TEXT_MUTED)
         elif config["api_key"]:
             origin = "variable d'entorn GEMINI_API_KEY" if config["source"] == "entorn" else "perfil de l'usuari, permisos 600"
             self.ai_status.configure(text=f"Clau desada ({mask_key(config['api_key'])}, {origin}). Model: {config['model']}.",

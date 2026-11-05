@@ -13,9 +13,9 @@ from tkinter import messagebox, ttk
 
 import customtkinter as ctk
 
+from core import argos_api
 from core.shodan_intel import (
-    SEARCH_LIMITS, SHODAN_STATE, ShodanError, ShodanRecon, delete_api_key, library_available,
-    load_api_key, lookup_to_host, mask_key, save_api_key, service_label, validate_public_ip,
+    SEARCH_LIMITS, SHODAN_STATE, ShodanError, ShodanRecon, available, delete_api_key, load_api_key, lookup_to_host, mask_key, save_api_key, service_label, validate_public_ip,
 )
 from gui.theme import (
     COLOR_ACCENT, COLOR_ACCENT_HOVER, COLOR_ACCENT_TEXT, COLOR_BORDER, COLOR_DANGER, COLOR_PRIMARY_DARK,
@@ -148,7 +148,7 @@ class ReconTab(ctk.CTkFrame):
         self.log_console.textbox.configure(height=96)
         self.log_console.grid(row=2, column=0, sticky="nsew", pady=(6, 0))
 
-        if not library_available():
+        if not available():
             for btn in (self.lookup_btn, self.search_btn, self.check_key_btn):
                 btn.configure(state="disabled")
             self._set_status("Falta la llibreria de Shodan. Instal·leu-la amb ./install_dependencies.sh "
@@ -177,10 +177,14 @@ class ReconTab(ctk.CTkFrame):
             text = f"Es fa servir la clau de la variable d'entorn SHODAN_API_KEY ({mask_key(key)})."
         elif source == "fitxer":
             text = f"Clau desada al perfil de l'usuari ({mask_key(key)}, permisos 600)."
+        elif argos_api.available():
+            text = ("No cal cap clau: les consultes es fan a través de l'API d'Argos. Si en teniu una de pròpia "
+                    "(https://account.shodan.io), la podeu desar aquí.")
         else:
             text = ("No hi ha cap clau configurada. Creeu un compte a https://account.shodan.io, copieu-hi "
                     "la clau de l'API i deseu-la aquí: no es guarda mai al codi ni a l'expedient.")
-        self.key_status.configure(text=f"{text} {extra}".strip(), text_color=COLOR_TEXT_MUTED if key else COLOR_DANGER)
+        ok = key or argos_api.available()
+        self.key_status.configure(text=f"{text} {extra}".strip(), text_color=COLOR_TEXT_MUTED if ok else COLOR_DANGER)
 
     def _save_key(self):
         key = self.key_entry.get().strip()
