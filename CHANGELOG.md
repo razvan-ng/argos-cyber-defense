@@ -9,6 +9,13 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.3.2] - 2026-11
+
+### Canviat
+- Quan `install_dependencies.sh` instal·la The Harvester a `sentinelx/tools/`, crea l'enllaç
+  `~/.local/bin/theHarvester` (Ubuntu ja té aquesta carpeta al PATH), perquè l'ordre `theHarvester`
+  funcioni des de qualsevol terminal i les comandes que mostra SentinelX siguin les de l'enunciat.
+
 ## [2.3.1] - 2026-11
 
 ### Afegit

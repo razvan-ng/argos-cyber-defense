@@ -406,7 +406,9 @@ recol·lecció d'informació (*information gathering*): no s'escaneja l'objectiu
 
 `./install_dependencies.sh` l'instal·la sol: amb apt si la distribució en té paquet (Kali) i, si no
 (Ubuntu), la versió 4.11.1 des de GitHub a `sentinelx/tools/theHarvester` amb uv, que descarrega el
-Python 3.14 que necessita l'eina. Si ja és al PATH (`theHarvester`), es fa servir aquest.
+Python 3.14 que necessita l'eina, i crea l'enllaç `~/.local/bin/theHarvester` perquè l'ordre funcioni
+des de qualsevol terminal (cal obrir-ne un de nou després d'instal·lar). Si ja és al PATH
+(`theHarvester`), es fa servir aquest.
 
 ### Ús
 

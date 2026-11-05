@@ -283,6 +283,14 @@ echo -e "\n${C_BOLD}--- The Harvester: cerca OSINT (opcional) ---${C_RESET}\n"
 HARVESTER_VERSION="4.11.1"
 HARVESTER_DIR="${SCRIPT_DIR}/tools/theHarvester"
 HARVESTER_BIN="${HARVESTER_DIR}/.venv/bin/theHarvester"
+HARVESTER_LINK="${HOME}/.local/bin/theHarvester"
+
+# Enllaç a ~/.local/bin (Ubuntu l'afegeix al PATH) perquè «theHarvester» funcioni des de qualsevol terminal
+link_theharvester() {
+    if [[ ! -e "$HARVESTER_LINK" ]] && mkdir -p "$(dirname "$HARVESTER_LINK")" && ln -s "$HARVESTER_BIN" "$HARVESTER_LINK"; then
+        info "Enllaç creat: ${HARVESTER_LINK}. Obriu un terminal nou si l'ordre 'theHarvester' encara no es troba."
+    fi
+}
 
 if command -v theHarvester >/dev/null 2>&1; then
     ok "'theHarvester' ja està instal·lat ($(command -v theHarvester))."
@@ -290,6 +298,7 @@ if command -v theHarvester >/dev/null 2>&1; then
 elif [[ -x "$HARVESTER_BIN" ]]; then
     ok "'theHarvester' ja està instal·lat a ${HARVESTER_DIR}."
     record "theharvester" "OK" "${HARVESTER_BIN}"
+    link_theharvester
 elif apt-cache policy theharvester 2>/dev/null | grep -q "Candidate: [0-9]"; then
     install_apt_package "theharvester" "theharvester" "command -v theHarvester"
 elif [[ -x "${VENV_PY:-}" ]] && command -v git >/dev/null 2>&1; then
@@ -302,6 +311,7 @@ elif [[ -x "${VENV_PY:-}" ]] && command -v git >/dev/null 2>&1; then
         && run_logged "verify theHarvester" "$HARVESTER_BIN" -h; then
         ok "The Harvester ${HARVESTER_VERSION} instal·lat i verificat."
         record "theharvester" "OK" "${HARVESTER_BIN}"
+        link_theharvester
     else
         warn "No s'ha pogut instal·lar The Harvester. És opcional: només afecta la pestanya 'OSINT' i l'opció 5 de shodan_recon.py."
         record "theharvester" "AVIS" "Instal·lació opcional fallida (git clone o uv sync). Detall a ${LOG_FILE}."
