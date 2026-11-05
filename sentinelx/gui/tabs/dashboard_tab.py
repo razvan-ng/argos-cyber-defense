@@ -17,8 +17,8 @@ from gui.theme import (
 GUIDE_STEPS = [
     "0. Expedients — inicia la sessió al portal d'Argos i obre l'expedient del client (o el fitxer d'expedient "
     "descarregat de la web). Si ja té auditories, la nova serà una reauditoria amb el mateix objectiu.",
-    "1. Reconeixement passiu — consulta a Shodan què se sap de l'objectiu a Internet (dominis, ports oberts i "
-    "serveis) sense enviar-hi cap paquet, i afegeix-ho a l'auditoria.",
+    "1. Reconeixement passiu i OSINT — consulta a Shodan què se sap de l'objectiu a Internet (dominis, ports "
+    "oberts i serveis) i cerca amb The Harvester correus i subdominis del domini, sense enviar-hi cap paquet.",
     "2. Auditoria de Xarxa — descobreix equips actius i escaneja els seus ports i serveis.",
     "3. Vulnerabilitats i CVE — correlaciona els serveis detectats amb CVEs coneguts i, si cal, "
     "executa un escaneig actiu amb els scripts NSE de nmap per confirmar-les.",

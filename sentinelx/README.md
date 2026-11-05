@@ -33,6 +33,8 @@ realitzar auditories tècniques completes:
    se sap de l'objectiu a Internet: noms de domini, ports oberts i producte i versió de cada
    servei (banner grabbing), i cerca d'equips per servei o producte. No envia cap paquet a la
    xarxa auditada. Els resultats es poden afegir a l'auditoria (vegeu l'apartat 8).
+   La pestanya **OSINT** cerca amb **The Harvester** correus, subdominis i IP públiques d'un domini
+   (vegeu l'apartat 9).
 2. **Auditoria de Xarxa Avançada** — descobriment d'equips (`nmap -sn`), escaneig de ports i
    detecció de serveis/versions/SO (`nmap -sV -O`), amb control sobre l'abast de l'escaneig
    (ports habituals, tots els ports `-p-`, ports personalitzats, i escaneig UDP `-sU`), i traçat
@@ -152,7 +154,7 @@ python main.py
 ```
 sentinelx/
 ├── main.py                     # Punt d'entrada
-├── shodan_recon.py             # Reconeixement passiu amb Shodan des del terminal
+├── shodan_recon.py             # Reconeixement passiu des del terminal (Shodan i The Harvester)
 ├── requirements.txt
 ├── install_dependencies.sh     # Instal·lador automàtic (Ubuntu 24.04/26.04)
 ├── QUICKSTART.md                # Guia d'inici ràpid (5-6 passos)
@@ -171,6 +173,7 @@ sentinelx/
 │   ├── vuln_correlator.py        # Correlació CVE (local + NVD API + NSE)
 │   ├── exploit_intel.py          # Consulta d'exploits coneguts (searchsploit)
 │   ├── shodan_intel.py           # Reconeixement passiu amb l'API de Shodan
+│   ├── harvester.py              # Cerca OSINT amb The Harvester (comanda i subprocess)
 │   ├── report_generator.py       # Generació d'informes HTML/PDF/JSON/CSV
 │   ├── portal_client.py          # Connexió amb el portal (sessió, expedients, auditories)
 │   ├── tls.py                    # Completa la cadena de certificats si el hosting no l'envia
@@ -181,7 +184,7 @@ sentinelx/
 │   ├── app.py                    # Finestra principal
 │   ├── theme.py                  # Identitat corporativa (des de branding.json) i colors
 │   ├── widgets/                  # Consola, dependències, comparació i diàlegs del portal
-│   └── tabs/                     # Pestanyes: Tauler, Expedients, Reconeixement, Xarxa, Sistema, CVE, Informes, Quant a
+│   └── tabs/                     # Pestanyes: Tauler, Expedients, Reconeixement, OSINT, Xarxa, Sistema, CVE, Informes, Quant a
 └── utils/
     ├── shell.py                   # Execució asíncrona de comandes externes
     └── resources.py               # Resolució de rutes compatible amb PyInstaller
@@ -392,3 +395,34 @@ clau) i fa servir el mateix mòdul (`core/shodan_intel.py`) que la pestanya.
 | *Shodan no té informació d'aquesta IP* | Shodan no l'ha indexada o no hi ha trobat ports oberts. |
 | *El pla de la clau de Shodan no permet aquesta consulta* | La cerca amb resultats necessita crèdits de consulta (Shodan Membership o pla acadèmic). |
 | *Falta la llibreria de Shodan* | Executeu `./install_dependencies.sh` o `venv/bin/pip install shodan`. |
+
+## 9. Cerca OSINT amb The Harvester
+
+[The Harvester](https://github.com/laramies/theHarvester) recull correus, subdominis, adreces IP i
+noms associats a un domini a partir de fonts públiques (cercadors, certificats, DNS passiu...). És
+recol·lecció d'informació (*information gathering*): no s'escaneja l'objectiu.
+
+### Instal·lació
+
+`./install_dependencies.sh` l'instal·la sol: amb apt si la distribució en té paquet (Kali) i, si no
+(Ubuntu), la versió 4.11.1 des de GitHub a `sentinelx/tools/theHarvester` amb uv, que descarrega el
+Python 3.14 que necessita l'eina. Si ja és al PATH (`theHarvester`), es fa servir aquest.
+
+### Ús
+
+- **Pestanya OSINT**: domini objectiu, font de dades (google, bing, linkedin o all) i, si es vol,
+  fitxer de resultats. La pestanya mostra la comanda abans d'executar-la, la sortida en temps real i
+  un resum de correus, hosts i IP.
+- **Terminal**: opció 5 de `venv/bin/python3 shodan_recon.py`, amb les mateixes preguntes.
+
+Totes dues construeixen la comanda i la llancen amb `subprocess`:
+
+```bash
+theHarvester -d iesebre.cat -b all -l 500 -f resultats
+```
+
+- `-f` desa els resultats en **XML i JSON** (`resultats.xml` i `resultats.json`). Les versions 4.x de
+  The Harvester ja no generen HTML.
+- **google** i **bing** s'han retirat de The Harvester (la 4.11.1 no les té): SentinelX ho avisa i
+  proposa **all** (totes les fonts) o **linkedin**. Algunes fonts de «all» necessiten claus d'API
+  (`~/.theHarvester/api-keys.yaml`); sense clau, The Harvester se les salta.

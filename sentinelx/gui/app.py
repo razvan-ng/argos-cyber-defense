@@ -12,6 +12,7 @@ from core.updates import UpdateCheckError, check_latest
 from gui.tabs.about_tab import AboutTab
 from gui.tabs.dashboard_tab import DashboardTab
 from gui.tabs.network_tab import NetworkTab
+from gui.tabs.osint_tab import OsintTab
 from gui.tabs.portal_tab import PortalTab
 from gui.tabs.recon_tab import ReconTab
 from gui.tabs.report_tab import ReportTab
@@ -26,6 +27,7 @@ from utils.resources import resource_path
 TAB_DASHBOARD = "Tauler"
 TAB_PORTAL = "Expedients"
 TAB_RECON = "Reconeixement passiu"
+TAB_OSINT = "OSINT"
 
 
 class SentinelXApp(ctk.CTk):
@@ -82,6 +84,7 @@ class SentinelXApp(ctk.CTk):
         tab_dashboard = self.tabview.add(TAB_DASHBOARD)
         tab_portal = self.tabview.add(TAB_PORTAL)
         tab_recon = self.tabview.add(TAB_RECON)
+        tab_osint = self.tabview.add(TAB_OSINT)
         tab_network = self.tabview.add("Auditoria de Xarxa")
         tab_system = self.tabview.add("Sistema Local")
         tab_vuln = self.tabview.add("Vulnerabilitats i CVE")
@@ -94,6 +97,7 @@ class SentinelXApp(ctk.CTk):
         self.portal_tab.pack(fill="both", expand=True)
         self.recon_tab = ReconTab(tab_recon, self.app_state, on_hosts_changed=self._on_hosts_changed)
         self.recon_tab.pack(fill="both", expand=True)
+        OsintTab(tab_osint, self.app_state).pack(fill="both", expand=True)
         self.network_tab = NetworkTab(tab_network, self.app_state)
         self.network_tab.pack(fill="both", expand=True)
         SystemTab(tab_system, self.app_state).pack(fill="both", expand=True)

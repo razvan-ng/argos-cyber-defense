@@ -4,8 +4,8 @@
 Versió de línia d'ordres del mòdul core/shodan_intel.py, que també fa servir la pestanya
 «Reconeixement passiu» de l'aplicació. Cap de les consultes envia paquets a l'objectiu.
 
-L'opció 5 llança The Harvester (cerca OSINT) amb subprocess; cal tenir-lo instal·lat
-(https://github.com/laramies/theHarvester) i accessible com a «theHarvester».
+L'opció 5 llança The Harvester (cerca OSINT) amb subprocess, amb el mòdul core/harvester.py que
+també fa servir la pestanya «OSINT». L'instal·la ./install_dependencies.sh.
 
 Ús (des de la carpeta de SentinelX):
     venv/bin/python3 shodan_recon.py
@@ -14,12 +14,13 @@ La clau de l'API es llegeix de la variable d'entorn SHODAN_API_KEY o de la confi
 SentinelX (la que es desa a la pestanya). Si no n'hi ha cap, el programa la demana.
 """
 import getpass
-import re
-import shlex
-import shutil
 import subprocess
 import sys
 
+from core.harvester import (
+    DEFAULT_SOURCE, INSTALL_HINT, SOURCES, HarvesterError, build_command, check_source, command_name, find_executable,
+    output_files, summarize, validate_domain,
+)
 from core.shodan_intel import (
     SEARCH_LIMITS, ShodanError, ShodanRecon, api_key_path, library_available, load_api_key, mask_key,
     save_api_key, service_label,
@@ -27,7 +28,7 @@ from core.shodan_intel import (
 
 LINE = "=" * 60
 MENU = """
-SentinelX: reconeixement passiu amb Shodan
+SentinelX: reconeixement passiu (Shodan i The Harvester)
   1. Consulta d'host (IP, dominis i ports oberts)
   2. Identificació de serveis (banner grabbing)
   3. Cerca de serveis específics
@@ -96,35 +97,32 @@ def show_key_status(recon, source):
     print(f"Pla: {info['plan']}. Crèdits de consulta: {info['query_credits']}. Crèdits d'escaneig: {info['scan_credits']}.")
 
 
-HARVESTER_SOURCES = ("google", "bing", "linkedin", "all")
-DOMAIN_RE = re.compile(r"^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$")
-
-
 def harvester_search():
     """Opció 5: demana domini, font i fitxer, construeix la comanda i la llança amb subprocess."""
-    tool = shutil.which("theHarvester")
+    tool = find_executable()
     if not tool:
-        print("No es troba theHarvester. Instal·leu-lo: https://github.com/laramies/theHarvester")
+        print(INSTALL_HINT)
         return
-    domini = input("Domini objectiu (p. ex. iesebre.cat): ").strip().lower()
-    if not DOMAIN_RE.match(domini):
-        print("Domini no vàlid.")
-        return
-    ajuda = subprocess.run([tool, "-h"], capture_output=True, text=True).stdout
+    domini = validate_domain(input("Domini objectiu (p. ex. iesebre.cat): "))
     while True:
-        font = input(f"Font de dades ({', '.join(HARVESTER_SOURCES)}) [all]: ").strip().lower() or "all"
-        if re.search(rf"\b{re.escape(font)}\b", ajuda):
+        font = input(f"Font de dades ({', '.join(SOURCES)}) [{DEFAULT_SOURCE}]: ").strip().lower() or DEFAULT_SOURCE
+        try:
+            check_source(tool, font)
             break
-        print(f"La versió instal·lada de theHarvester no té la font «{font}» (s'ha retirat de l'eina). "
-              "Trieu «all» o una altra font de «theHarvester -h».")
-    comanda = f"theHarvester -d {shlex.quote(domini)} -b {shlex.quote(font)} -l 500"
-    if input("Voleu desar els resultats en un fitxer HTML o XML? [s/N] ").strip().lower() == "s":
-        nom = input("Nom del fitxer (sense extensió): ").strip()
-        if nom:
-            comanda += f" -f {shlex.quote(nom)}"
+        except HarvesterError as exc:
+            print(exc)
+    fitxer = ""
+    if input("Voleu desar els resultats en un fitxer (XML i JSON)? [s/N] ").strip().lower() == "s":
+        fitxer = input("Nom del fitxer (sense extensió): ").strip()
+    comanda = build_command(domini, font, fitxer, executable=command_name(tool))
     print(f"[*] Iniciant escaneig sobre {domini} utilitzant {font}...")
-    print(f"[*] Comanda: {comanda}\n")
+    print(f"[*] Comanda: {comanda}\n", flush=True)
     subprocess.call(comanda, shell=True)
+    if fitxer:
+        xml, json_file = output_files(fitxer)
+        print(f"\n[*] Resultats desats a {xml} i {json_file}")
+        for label, count, _first in summarize(json_file):
+            print(f"    {label}: {count}")
 
 
 def main():
@@ -156,7 +154,7 @@ def main():
             continue
         try:
             actions[choice]()
-        except ShodanError as exc:
+        except (ShodanError, HarvesterError) as exc:
             print(f"\nError: {exc}")
 
 

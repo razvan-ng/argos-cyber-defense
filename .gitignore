@@ -1,6 +1,9 @@
 # Entorn virtual i memòria cau de Python
 venv/
 .venv/
+
+# Eines externes que instal·la install_dependencies.sh (The Harvester)
+sentinelx/tools/
 __pycache__/
 *.py[cod]
 

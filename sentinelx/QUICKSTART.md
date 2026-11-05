@@ -37,7 +37,8 @@ exactament què instal·lar.
 
 1. (Opcional) A la pestanya **Reconeixement passiu**, desa la clau de l'API de Shodan i consulta
    què se sap de l'IP pública de l'objectiu abans d'escanejar-la. **Afegeix a l'auditoria** en
-   passa els ports i serveis a la sessió.
+   passa els ports i serveis a la sessió. A la pestanya **OSINT**, The Harvester cerca correus i
+   subdominis públics del domini del client.
 2. A la pestanya **Auditoria de Xarxa**, introdueix l'IP o subxarxa a
    auditar (ex. `192.168.1.0/24`) i prem **Descobriment d'Equips**.
 3. Selecciona un equip (doble clic per copiar la seva IP) i executa

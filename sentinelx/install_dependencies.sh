@@ -274,12 +274,50 @@ else
 fi
 
 # ------------------------------------------------------------------ #
-# 5. Resum final
+# 5. The Harvester: cerca OSINT (opcional, pestanya «OSINT»)
+# ------------------------------------------------------------------ #
+echo -e "\n${C_BOLD}--- The Harvester: cerca OSINT (opcional) ---${C_RESET}\n"
+
+# Ubuntu no en té paquet (Kali sí): s'instal·la des de GitHub dins de tools/ amb uv, que descarrega
+# el Python 3.14 que necessita l'eina si el sistema no el té. SentinelX el troba en aquesta carpeta.
+HARVESTER_VERSION="4.11.1"
+HARVESTER_DIR="${SCRIPT_DIR}/tools/theHarvester"
+HARVESTER_BIN="${HARVESTER_DIR}/.venv/bin/theHarvester"
+
+if command -v theHarvester >/dev/null 2>&1; then
+    ok "'theHarvester' ja està instal·lat ($(command -v theHarvester))."
+    record "theharvester" "OK" "$(command -v theHarvester)"
+elif [[ -x "$HARVESTER_BIN" ]]; then
+    ok "'theHarvester' ja està instal·lat a ${HARVESTER_DIR}."
+    record "theharvester" "OK" "${HARVESTER_BIN}"
+elif apt-cache policy theharvester 2>/dev/null | grep -q "Candidate: [0-9]"; then
+    install_apt_package "theharvester" "theharvester" "command -v theHarvester"
+elif [[ -x "${VENV_PY:-}" ]] && command -v git >/dev/null 2>&1; then
+    info "Instal·lant The Harvester ${HARVESTER_VERSION} des de GitHub a ${HARVESTER_DIR} (pot trigar uns minuts)..."
+    [[ -d "$HARVESTER_DIR" ]] && rm -rf "$HARVESTER_DIR"  # instal·lació anterior incompleta
+    if run_logged "pip install uv" "$VENV_PY" -m pip install uv \
+        && run_logged "git clone theHarvester" git clone --depth 1 --branch "$HARVESTER_VERSION" \
+            https://github.com/laramies/theHarvester.git "$HARVESTER_DIR" \
+        && (cd "$HARVESTER_DIR" && run_logged "uv sync theHarvester" "${VENV_DIR}/bin/uv" sync --no-dev) \
+        && run_logged "verify theHarvester" "$HARVESTER_BIN" -h; then
+        ok "The Harvester ${HARVESTER_VERSION} instal·lat i verificat."
+        record "theharvester" "OK" "${HARVESTER_BIN}"
+    else
+        warn "No s'ha pogut instal·lar The Harvester. És opcional: només afecta la pestanya 'OSINT' i l'opció 5 de shodan_recon.py."
+        record "theharvester" "AVIS" "Instal·lació opcional fallida (git clone o uv sync). Detall a ${LOG_FILE}."
+    fi
+else
+    warn "No s'ha pogut instal·lar The Harvester: cal l'entorn virtual de SentinelX i 'git'."
+    record "theharvester" "AVIS" "Falta l'entorn virtual o git."
+fi
+
+# ------------------------------------------------------------------ #
+# 6. Resum final
 # ------------------------------------------------------------------ #
 echo -e "\n${C_BOLD}=== Resum de la instal·lació ===${C_RESET}\n"
 
 REQUIRED_STEPS=(nmap traceroute ping ss netstat git python3 python3-venv python3-pip python3-tk python3-dev build-essential venv pip-requirements gui-check)
-OPTIONAL_STEPS=(ufw exploitdb)
+OPTIONAL_STEPS=(ufw exploitdb theharvester)
 
 any_required_failed=0
 

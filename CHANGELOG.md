@@ -9,6 +9,23 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.3.1] - 2026-11
+
+### Afegit
+- Pestanya **OSINT** a l'aplicació: cerca amb The Harvester amb el domini, la font de dades (google,
+  bing, linkedin o all) i, si es vol, el fitxer de resultats (`-f`, en XML i JSON). Mostra la comanda
+  abans d'executar-la, la sortida en temps real i un resum de correus, hosts i IP trobats.
+- `install_dependencies.sh` instal·la The Harvester 4.11.1: amb apt si la distribució en té paquet
+  (Kali) i, si no (Ubuntu), des de GitHub a `sentinelx/tools/theHarvester` amb uv. La pestanya Quant a
+  i la comprovació d'eines inicial indiquen si està disponible.
+- Mòdul comú `core/harvester.py` per a la pestanya i per a l'opció 5 de `shodan_recon.py`.
+
+### Corregit
+- L'opció 5 rebutjava les fonts «all» i «linkedin» amb The Harvester 4.11.1, perquè les buscava a
+  l'ajuda de `theHarvester -h`, on no surten. Ara les fonts es consulten a la mateixa eina: «all» i
+  «linkedin» funcionen, i «google» i «bing» (retirades de The Harvester) s'expliquen amb un avís.
+- L'opció 5 també troba The Harvester quan no és al PATH (instal·lació de `install_dependencies.sh`).
+
 ## [2.3.0] - 2026-11
 
 ### Afegit
@@ -17,8 +34,7 @@ Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coi
   `theHarvester -d <domini> -b <font> -l 500` i la llança amb `subprocess`. Opcionalment desa els
   resultats en un fitxer (paràmetre `-f`). Cal tenir The Harvester instal·lat
   (https://github.com/laramies/theHarvester).
-- Si la versió instal·lada de The Harvester no té la font triada (la 5.0.0 ja no inclou google, bing
-  ni linkedin), l'script ho avisa i torna a preguntar.
+- Si la versió instal·lada de The Harvester no té la font triada, l'script ho avisa i torna a preguntar.
 
 ### Canviat
 - L'script de terminal només demana la clau de Shodan quan es tria una opció de Shodan.

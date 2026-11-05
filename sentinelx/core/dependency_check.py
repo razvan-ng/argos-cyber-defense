@@ -7,6 +7,8 @@ PATH abans de permetre executar els mòduls d'auditoria corresponents.
 import platform
 import shutil
 
+from core.harvester import find_executable as find_theharvester
+
 REQUIRED_TOOLS = {
     "nmap": {
         "description": "Descobriment d'equips i escaneig de ports/serveis",
@@ -37,6 +39,11 @@ OPTIONAL_TOOLS = {
         "description": "Consulta de l'estat del tallafocs — opcional",
         "apt_package": "ufw",
     },
+    "theHarvester": {
+        "description": "Cerca OSINT de correus i subdominis (pestanya OSINT) — opcional; l'instal·la install_dependencies.sh",
+        "apt_package": "theharvester",
+        "locate": find_theharvester,  # també el troba dins de tools/, on el deixa l'instal·lador
+    },
 }
 
 
@@ -48,7 +55,7 @@ def _evaluate(tools_dict):
     results = {}
     missing = []
     for tool, meta in tools_dict.items():
-        found = check_tool(tool)
+        found = bool(meta["locate"]()) if "locate" in meta else check_tool(tool)
         resolved_as = tool if found else None
         if not found:
             for alt in meta.get("alternatives", []):

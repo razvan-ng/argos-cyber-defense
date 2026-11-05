@@ -13,9 +13,11 @@ class CommandRunner:
         self._process = None
         self._lock = threading.Lock()
 
-    def run_async(self, args, on_output, on_done):
-        """Executa `args` (llista, sense shell) en un fil i retorna el Thread.
+    def run_async(self, args, on_output, on_done, env=None):
+        """Executa `args` en un fil i retorna el Thread.
 
+        `args` és una llista (sense shell) o una cadena de text, que s'executa amb el shell com
+        una comanda escrita al terminal. `env` substitueix les variables d'entorn si s'indica.
         on_output(line: str) es crida per cada línia de sortida (stdout+stderr).
         on_done(returncode: int) es crida en finalitzar.
         """
@@ -24,6 +26,8 @@ class CommandRunner:
             try:
                 process = subprocess.Popen(
                     args,
+                    shell=isinstance(args, str),
+                    env=env,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                     text=True,
