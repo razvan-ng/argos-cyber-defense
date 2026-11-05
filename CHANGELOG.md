@@ -9,6 +9,21 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.6.0] - 2026-11
+
+### Afegit
+- **IA de Cloudflare com a reserva gratuïta** a l'API d'Argos: si Gemini està saturat o no està
+  disponible, respon Workers AI (Gemma 4 i, si cal, Llama 3.3 70B) amb la quota diària gratuïta.
+- L'informe per a l'empresa i les explicacions indiquen quina IA ha redactat el text.
+
+### Canviat
+- Models de Gemini actualitzats a `gemini-3.5-flash` (els 2.5 ja no estan disponibles per a comptes
+  nous), amb `gemini-3.5-flash-lite` quan el principal està saturat.
+- Les traduccions es fan en lots de 5 descripcions i l'espera màxima passa a 180 segons.
+
+### Corregit
+- Les respostes de la IA amb text o blocs de codi al voltant del JSON ja no donen error.
+
 ## [2.5.0] - 2026-11
 
 ### Afegit

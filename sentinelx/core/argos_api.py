@@ -13,7 +13,7 @@ import requests
 from core.branding import load_branding
 
 API_URL_ENV = "ARGOS_API_URL"
-TIMEOUT = 120
+TIMEOUT = 180
 
 
 class ArgosAPIError(Exception):

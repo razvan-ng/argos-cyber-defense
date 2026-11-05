@@ -100,9 +100,9 @@ class ReportTab(ctk.CTkFrame):
         ctk.CTkLabel(card, text="Informe senzill per a l'empresa (assistent d'IA)", font=("Segoe UI", 13, "bold"),
                      text_color=COLOR_PRIMARY_DARK).pack(anchor="w", padx=16, pady=(12, 2))
         ctk.CTkLabel(
-            card, text="Google Gemini redacta un informe sense tecnicismes per a la direcció de l'empresa (nivell de "
-            "risc, riscos principals, què cal fer i glossari) i, a la pestanya Vulnerabilitats, tradueix les "
-            "descripcions al català i explica cada troballa.", text_color=COLOR_TEXT_MUTED, wraplength=640,
+            card, text="La IA (Google Gemini o, si no està disponible, la de Cloudflare) redacta un informe sense "
+            "tecnicismes per a la direcció de l'empresa (nivell de risc, riscos principals, què cal fer i glossari) i, "
+            "a la pestanya Vulnerabilitats, tradueix les descripcions al català i explica cada troballa.", text_color=COLOR_TEXT_MUTED, wraplength=640,
             justify="left",
         ).pack(anchor="w", padx=16)
 
@@ -162,12 +162,12 @@ class ReportTab(ctk.CTkFrame):
 
     def _check_ai(self):
         self.ai_check_btn.configure(state="disabled")
-        self._refresh_ai_status("Comprovant la clau amb Gemini...")
+        self._refresh_ai_status("Comprovant la IA...")
 
         def worker():
             try:
-                model = AIAssistant().check()
-                done = (f"La clau funciona: Gemini ({model}) respon correctament.", COLOR_SUCCESS)
+                provider = AIAssistant().check()
+                done = (f"La IA funciona: ha respost {provider}.", COLOR_SUCCESS)
             except AIError as exc:
                 done = (str(exc), COLOR_DANGER)
             self.after(0, lambda: (self.ai_check_btn.configure(state="normal"), self._refresh_ai_status(*done)))
@@ -187,8 +187,8 @@ class ReportTab(ctk.CTkFrame):
         expedient = self.app_state.active_expedient or {}
         client = (expedient.get("empresa") or {}).get("nom", "")
         session, anonymize = self.app_state.session, self.anonymize_var.get()
-        self.company_btn.configure(state="disabled", text="Gemini està redactant l'informe...")
-        self._refresh_ai_status("Gemini està redactant l'informe senzill (pot trigar uns segons)...")
+        self.company_btn.configure(state="disabled", text="La IA està redactant l'informe...")
+        self._refresh_ai_status("La IA està redactant l'informe senzill (pot trigar fins a un minut)...")
 
         def worker():
             try:

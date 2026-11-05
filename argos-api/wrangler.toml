@@ -6,6 +6,10 @@ name = "argos-api"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
 
+# IA de Cloudflare (Workers AI): reserva gratuïta, amb quota diària, quan Gemini no està disponible
+[ai]
+binding = "AI"
+
 # Límits per ordinador (adreça IP) i per minut, perquè ningú no pugui gastar les consultes de tothom
 [[ratelimits]]
 name = "LIMIT_IA"

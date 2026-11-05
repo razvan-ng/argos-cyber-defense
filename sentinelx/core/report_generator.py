@@ -16,7 +16,7 @@ RISK_COLORS = {"Baix": "#2E7D32", "Moderat": "#B7791F", "Alt": "#C62828", "Crít
 URGENCY_COLORS = {"Immediata": "#C62828", "Aquest mes": "#B7791F", "Planificada": "#0F6F8A"}
 AI_REPORT_NOTE = (
     "Aquest informe resumeix l'auditoria en llenguatge senzill per a la direcció de l'empresa. El text s'ha "
-    "redactat amb un assistent d'intel·ligència artificial (Google Gemini) a partir dels resultats tècnics de "
+    "redactat amb un assistent d'intel·ligència artificial ({provider}) a partir dels resultats tècnics de "
     "SentinelX i l'ha de revisar l'equip auditor abans d'entregar-lo. El detall de cada troballa és a "
     "l'informe tècnic complet."
 )
@@ -404,7 +404,8 @@ class ReportGenerator:
                                           ("VALIGN", (0, 0), (-1, -1), "TOP")]))
             story.append(glossary)
 
-        story += [Spacer(1, 16), para(AI_REPORT_NOTE, small),
+        note = AI_REPORT_NOTE.format(provider=ai_report.get("proveidor") or "Google Gemini")
+        story += [Spacer(1, 16), para(note, small),
                   para(f"{self.company_name}, {self.app_name} {self.app_version}", small)]
         doc = SimpleDocTemplate(output_path, pagesize=A4, topMargin=16 * mm, bottomMargin=16 * mm,
                                 leftMargin=22 * mm, rightMargin=22 * mm, title="Informe de seguretat per a la direcció")

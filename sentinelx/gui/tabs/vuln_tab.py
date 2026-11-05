@@ -182,7 +182,7 @@ class VulnTab(ctk.CTkFrame):
         """Tradueix al català les descripcions en anglès o castellà (s'executa en el fil de treball)."""
         if not vulns or not self._translate_enabled:
             return
-        self.after(0, lambda: self.log_console.log(f"[IA] Traduint {len(vulns)} descripció(ns) al català amb Gemini..."))
+        self.after(0, lambda: self.log_console.log(f"[IA] Traduint {len(vulns)} descripció(ns) al català..."))
         try:
             translations = AIAssistant().translate([v.description for v in vulns])
         except AIError as exc:
@@ -212,7 +212,7 @@ class VulnTab(ctk.CTkFrame):
             self._show_explanation(ref, self._explanations[key])
             return
         self.explain_btn.configure(state="disabled", text="Explicant...")
-        self.log_console.log(f"[IA] Demanant a Gemini l'explicació de {vuln.cve_id} ({ip})...")
+        self.log_console.log(f"[IA] Demanant l'explicació de {vuln.cve_id} ({ip})...")
 
         def worker():
             try:

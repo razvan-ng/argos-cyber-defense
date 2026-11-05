@@ -438,7 +438,9 @@ theHarvester -d iesebre.cat -b all -l 500 -f resultats
 ## 10. Assistent d'IA (Google Gemini)
 
 SentinelX pot fer servir [Gemini](https://ai.google.dev) per fer les auditories entenedores per a
-persones sense coneixements tècnics:
+persones sense coneixements tècnics. Si Gemini està saturat, prova un model més lleuger, i a través de
+l'API d'Argos, si Gemini no està disponible, respon la IA de Cloudflare (Gemma 4). L'informe i les
+explicacions indiquen quina IA ha redactat el text.
 
 - **Informe senzill per a l'empresa** (pestanya Informes): PDF per a la direcció amb el nivell de risc,
   un resum, els riscos principals explicats sense tecnicismes (què passa, què podria passar, urgència i

@@ -24,9 +24,10 @@ from core.portal_client import settings_path as portal_settings_path
 
 API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 API_KEY_ENV = "GEMINI_API_KEY"
-DEFAULT_MODEL = "gemini-flash-latest"
-TIMEOUT = 120
-TRANSLATE_BATCH = 15
+DEFAULT_MODEL = "gemini-3.5-flash"
+FALLBACK_MODEL = "gemini-3.5-flash-lite"  # si el model principal està saturat (503) o al límit (429)
+TIMEOUT = 180
+TRANSLATE_BATCH = 5
 MAX_REPORT_FINDINGS = 40
 RISK_LEVELS = ("Baix", "Moderat", "Alt", "Crític")
 URGENCY_LEVELS = ("Immediata", "Aquest mes", "Planificada")
@@ -179,6 +180,7 @@ class AIAssistant:
         self.api_key = (api_key or config["api_key"]).strip()
         self.model = model or config["model"] or DEFAULT_MODEL
         self.via_argos = not self.api_key and argos_api.available()
+        self.provider = ""  # quina IA ha redactat la darrera resposta (p. ex. «Google Gemini (gemini-3.5-flash)»)
         if not self.api_key and not self.via_argos:
             raise AIError("Falta la clau de l'API de Gemini. Creeu-ne una a https://aistudio.google.com/apikey "
                           "i deseu-la a la pestanya Informes.")
@@ -187,8 +189,8 @@ class AIAssistant:
         """Comprova la clau amb una consulta mínima. Retorna el model que respon."""
         result = self._generate('Respon només amb aquest JSON: {"estat": "ok"}', temperature=0)
         if not isinstance(result, dict) or result.get("estat") != "ok":
-            raise AIError("Gemini ha respost, però no amb el format esperat.")
-        return self.model
+            raise AIError("La IA ha respost, però no amb el format esperat.")
+        return self.provider
 
     def translate(self, texts):
         """Tradueix al català una llista de textos (en anglès o castellà) mantenint l'ordre."""
@@ -236,7 +238,9 @@ class AIAssistant:
             "risc": str(result.get("risc", "")).strip(),
             "que_cal_fer": [str(a).strip() for a in (actions if isinstance(actions, list) else [actions]) if str(a).strip()],
         }
-        return anonymizer.show_all(explanation)
+        explanation = anonymizer.show_all(explanation)
+        explanation["proveidor"] = self.provider
+        return explanation
 
     def company_report(self, session, client_name="", anonymizer=None):
         """Contingut de l'informe senzill per a l'empresa (vegeu ReportGenerator.generate_company_pdf)."""
@@ -289,7 +293,9 @@ class AIAssistant:
         result = self._generate(prompt, temperature=0.3)
         if not isinstance(result, dict):
             raise AIError("Gemini no ha retornat l'informe amb el format esperat.")
-        return anonymizer.show_all(_normalize_report(result))
+        report = anonymizer.show_all(_normalize_report(result))
+        report["proveidor"] = self.provider
+        return report
 
     # ------------------------------------------------------------------ #
     def _generate(self, prompt, temperature=0.3):
@@ -307,11 +313,14 @@ class AIAssistant:
                                   "Google de la clau de l'empresa.") from exc
                 raise (AIError(str(exc)) if exc.own else _http_error(exc.status, str(exc))) from exc
         else:
-            try:
-                response = requests.post(API_URL.format(model=self.model), json=body, timeout=TIMEOUT,
-                                         headers={"x-goog-api-key": self.api_key})
-            except requests.exceptions.RequestException as exc:
-                raise AIError(f"No s'ha pogut connectar amb Gemini. Comproveu la connexió a Internet ({exc}).") from exc
+            for model in dict.fromkeys([self.model, FALLBACK_MODEL]):
+                try:
+                    response = requests.post(API_URL.format(model=model), json=body, timeout=TIMEOUT,
+                                             headers={"x-goog-api-key": self.api_key})
+                except requests.exceptions.RequestException as exc:
+                    raise AIError(f"No s'ha pogut connectar amb Gemini. Comproveu la connexió a Internet ({exc}).") from exc
+                if response.status_code not in (429, 500, 503):
+                    break  # resposta correcta o error que no s'arregla canviant de model
             if not response.ok:
                 try:
                     detail = response.json().get("error", {}).get("message", "")
@@ -322,15 +331,29 @@ class AIAssistant:
                 data = response.json()
             except ValueError as exc:
                 raise AIError("Gemini ha retornat una resposta inesperada.") from exc
+            data.setdefault("argos_proveidor", f"Google Gemini ({model})")
+        self.provider = data.get("argos_proveidor") or "Google Gemini"
         try:
             candidate = data["candidates"][0]
             text = "".join(part.get("text", "") for part in candidate["content"]["parts"])
         except (ValueError, KeyError, IndexError, TypeError) as exc:
             raise AIError("Gemini no ha retornat cap resposta (pot ser que l'hagi bloquejat el seu filtre).") from exc
+        return _parse_json(text)
+
+
+def _parse_json(text):
+    """Llegeix el JSON de la resposta, encara que el model hi afegeixi text o blocs de codi al voltant."""
+    text = _strip_fences(text)
+    candidates = [text]
+    start, end = text.find("{"), text.rfind("}")
+    if 0 <= start < end:
+        candidates.append(text[start:end + 1])
+    for candidate in candidates:
         try:
-            return json.loads(_strip_fences(text))
-        except ValueError as exc:
-            raise AIError("La resposta de Gemini no és JSON vàlid. Torneu-ho a provar.") from exc
+            return json.loads(candidate, strict=False)
+        except ValueError:
+            continue
+    raise AIError("La resposta de la IA no és JSON vàlid. Torneu-ho a provar.")
 
 
 def _strip_fences(text):
@@ -353,7 +376,7 @@ def _http_error(code, detail):
         return AIError("S'ha arribat al límit de consultes del pla gratuït de Gemini. Espereu un minut i "
                        "torneu-ho a provar.")
     if code >= 500:
-        return AIError("El servei de Gemini no està disponible ara mateix. Torneu-ho a provar d'aquí a una estona.")
+        return AIError("Gemini està saturat o no està disponible ara mateix. Torneu-ho a provar d'aquí a una estona.")
     return AIError(f"Error de l'API de Gemini (HTTP {code}): {detail[:200]}")
 
 

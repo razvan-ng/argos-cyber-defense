@@ -3,7 +3,7 @@ import customtkinter as ctk
 
 from gui.theme import COLOR_ACCENT, COLOR_ACCENT_HOVER, COLOR_PRIMARY_DARK, COLOR_TEXT_MUTED, FONT_DISPLAY_FAMILY
 
-AI_NOTE = ("Explicació redactada amb un assistent d'IA (Google Gemini) a partir de les dades de l'auditoria. "
+AI_NOTE = ("Explicació redactada amb un assistent d'IA ({provider}) a partir de les dades de l'auditoria. "
            "Reviseu-la abans de fer-la servir amb el client.")
 
 
@@ -17,7 +17,8 @@ class ExplanationDialog(ctk.CTkToplevel):
 
         ctk.CTkButton(self, text="Tanca", width=110, command=self.destroy, fg_color=COLOR_ACCENT,
                       hover_color=COLOR_ACCENT_HOVER, text_color=COLOR_PRIMARY_DARK).pack(side="bottom", pady=(6, 14))
-        ctk.CTkLabel(self, text=AI_NOTE, text_color=COLOR_TEXT_MUTED, wraplength=580, justify="left").pack(
+        note = AI_NOTE.format(provider=explanation.get("proveidor") or "Google Gemini")
+        ctk.CTkLabel(self, text=note, text_color=COLOR_TEXT_MUTED, wraplength=580, justify="left").pack(
             side="bottom", padx=24, pady=(4, 0), anchor="w"
         )
 

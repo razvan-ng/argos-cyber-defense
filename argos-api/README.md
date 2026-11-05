@@ -11,8 +11,12 @@ SentinelX ──► API d'Argos (Cloudflare Workers, amb les claus) ──► Ge
 | Ruta | Què fa |
 |------|--------|
 | `GET /v1/estat` | Indica si la IA i Shodan estan configurats |
-| `POST /v1/gemini` | Envia la petició a Gemini (només els models `gemini-flash-latest`, `gemini-flash-lite-latest`, `gemini-2.5-flash` i `gemini-2.5-flash-lite`) |
+| `POST /v1/gemini` | Envia la petició a Gemini (`gemini-3.5-flash`; si està saturat, `gemini-3.5-flash-lite`). Si Gemini no està disponible, la respon la **IA de Cloudflare** (Workers AI: Gemma 4 i, si cal, Llama 3.3 70B), gratuïta amb una quota diària. El camp `argos_proveidor` de la resposta diu quina IA ha redactat el text |
 | `POST /v1/shodan` | Consulta d'host, cerca, recompte o estat del pla de Shodan |
+
+**Sense pagar res.** La clau de Gemini ha de ser d'un compte personal de Google (el pla gratuït no
+està disponible en alguns comptes d'escoles o empreses). Si Gemini està saturat o se supera el seu
+límit gratuït, la IA de Cloudflare ho cobreix amb la quota diària gratuïta de Workers AI.
 
 **Protecció.** Només s'accepten peticions de SentinelX, els models i les accions de la llista, i
 peticions de menys de 200 KB. Cada ordinador (adreça IP) pot fer com a màxim 8 consultes d'IA i 20
