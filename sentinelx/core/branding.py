@@ -24,7 +24,7 @@ DEFAULT_BRANDING = {
     "portal_url": "https://argoscyberdefense.tech",
     "api_url": "https://argos-api.argos-api.workers.dev",  # API d'Argos (argos-api/): Gemini i Shodan sense que l'usuari posi cap clau
     "copyright": "Argos Cyber Defense",
-    "version": "2.7.1",
+    "version": "2.7.2",
     "project_label": (
         "Projecte Intermodular — 2n curs, Cicle Formatiu de Grau Superior "
         "d'Administració de Sistemes Informàtics en Xarxa (ASIX)"

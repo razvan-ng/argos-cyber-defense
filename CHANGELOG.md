@@ -9,6 +9,12 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.7.2] - 2026-11
+
+### Corregit
+- Els missatges d'estat llargs de les pestanyes Auditoria de Xarxa, OSINT i Reconeixement passiu
+  eixamplaven tota la finestra; ara salten de línia.
+
 ## [2.7.1] - 2026-11
 
 ### Canviat

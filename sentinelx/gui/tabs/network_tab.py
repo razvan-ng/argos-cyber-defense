@@ -81,7 +81,8 @@ class NetworkTab(ctk.CTkFrame):
         self.progress.pack(fill="x", padx=12, pady=(0, 6))
         self.progress.set(0)
 
-        self.status_label = ctk.CTkLabel(self, text="Preparat.", anchor="w")
+        # Amb wraplength el text llarg salta de línia en lloc d'eixamplar tota la finestra
+        self.status_label = ctk.CTkLabel(self, text="Preparat.", anchor="w", justify="left", wraplength=1100)
         self.status_label.pack(side="bottom", fill="x", padx=12, pady=(0, 8))
 
         body = ctk.CTkFrame(self, fg_color="transparent")

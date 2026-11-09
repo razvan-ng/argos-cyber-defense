@@ -108,7 +108,7 @@ class ReconTab(ctk.CTkFrame):
         self.progress.set(0)
 
         # La línia d'estat es col·loca abans dels resultats perquè no quedi tallada en finestres baixes
-        self.status_label = ctk.CTkLabel(self, text="Preparat.", anchor="w")
+        self.status_label = ctk.CTkLabel(self, text="Preparat.", anchor="w", justify="left", wraplength=1100)
         self.status_label.pack(side="bottom", fill="x", padx=12, pady=(2, 6))
 
         # 3. Resultats
