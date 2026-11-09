@@ -155,7 +155,9 @@ class VulnTab(ctk.CTkFrame):
                 findings = correlator.correlate_service(
                     service, on_log=lambda m: self.after(0, lambda msg=m: self.log_console.log(msg))
                 )
-                service.vulnerabilities = findings
+                # Es conserven les troballes dels escanejos actius (NSE, vulners) que la correlació no troba
+                new_ids = {v.cve_id for v in findings}
+                service.vulnerabilities = findings + [v for v in service.vulnerabilities if v.cve_id not in new_ids]
                 total_findings += len(findings)
                 foreign.extend(v for v in findings if not correlator.is_local_text(v))
                 for vuln in findings:
@@ -306,6 +308,17 @@ class VulnTab(ctk.CTkFrame):
         self._all_rows.append((values, ref))
         if self._matches_filter(values):
             self._row_refs[self.tree.insert("", "end", values=values, tags=(values[0],))] = ref
+
+    def sync_with_session(self):
+        """Mostra totes les troballes de la sessió (p. ex. les de la modalitat 4 de l'Auditoria de Xarxa)."""
+        self._all_rows = []
+        for host in self.app_state.session.hosts:
+            for service in host.services:
+                label = f"{service.port}/{service.protocol} {service.product or service.service_name}"
+                for vuln in service.vulnerabilities:
+                    ref = (host.ip, label, vuln)
+                    self._all_rows.append((self._row_values(ref), ref))
+        self._apply_filter()
 
     def _refresh_rows(self):
         """Torna a generar les files (p. ex. després de traduir les descripcions)."""

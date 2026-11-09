@@ -19,7 +19,8 @@ GUIDE_STEPS = [
     "descarregat de la web). Si ja té auditories, la nova serà una reauditoria amb el mateix objectiu.",
     "1. Reconeixement passiu i OSINT — consulta a Shodan què se sap de l'objectiu a Internet (dominis, ports "
     "oberts i serveis) i cerca amb The Harvester correus i subdominis del domini, sense enviar-hi cap paquet.",
-    "2. Auditoria de Xarxa — descobreix equips actius i escaneja els seus ports i serveis.",
+    "2. Auditoria de Xarxa — tria la modalitat d'escaneig amb Nmap: descobriment d'hosts, ports oberts, "
+    "serveis i versions o vulnerabilitats conegudes (scripts NSE).",
     "3. Vulnerabilitats i CVE — correlaciona els serveis detectats amb CVEs coneguts i, si cal, "
     "executa un escaneig actiu amb els scripts NSE de nmap per confirmar-les.",
     "4. Sistema Local — audita el propi equip: processos, connexions, tallafocs i reforçament "

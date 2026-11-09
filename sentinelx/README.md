@@ -35,8 +35,9 @@ realitzar auditories tècniques completes:
    xarxa auditada. Els resultats es poden afegir a l'auditoria (vegeu l'apartat 8).
    La pestanya **OSINT** cerca amb **The Harvester** correus, subdominis i IP públiques d'un domini
    (vegeu l'apartat 9).
-2. **Auditoria de Xarxa Avançada** — descobriment d'equips (`nmap -sn`), escaneig de ports i
-   detecció de serveis/versions/SO (`nmap -sV -O`), amb control sobre l'abast de l'escaneig
+2. **Auditoria de Xarxa Avançada** — escaneig amb Nmap per modalitats (python-nmap): descobriment
+   d'hosts actius (`-sn`), ports oberts, serveis i versions (`-sV`, i SO amb `-O`) i vulnerabilitats
+   conegudes amb els scripts NSE (`--script vuln`, inclòs `vulners`), amb control sobre l'abast de l'escaneig
    (ports habituals, tots els ports `-p-`, ports personalitzats, i escaneig UDP `-sU`), i traçat
    de rutes (`traceroute`/`tracepath`). Doble clic sobre un equip detectat copia la seva IP al
    camp d'objectiu.
@@ -156,6 +157,7 @@ python main.py
 sentinelx/
 ├── main.py                     # Punt d'entrada
 ├── shodan_recon.py             # Reconeixement passiu des del terminal (Shodan i The Harvester)
+├── escaneig.py                 # Escaneig amb Nmap per modalitats des del terminal
 ├── requirements.txt
 ├── install_dependencies.sh     # Instal·lador automàtic (Ubuntu 24.04/26.04)
 ├── QUICKSTART.md                # Guia d'inici ràpid (5-6 passos)
@@ -168,7 +170,8 @@ sentinelx/
 │   ├── app_state.py              # Estat compartit de la sessió, Mode Segur, prioritats
 │   ├── branding.py                # Càrrega de la configuració de marca (data/branding.json)
 │   ├── dependency_check.py       # Health check d'eines externes
-│   ├── network_scanner.py        # Ping sweep, escaneig de ports/serveis i NSE (nmap)
+│   ├── nmap_modes.py             # Escaneig amb Nmap per modalitats (python-nmap)
+│   ├── network_scanner.py        # Escaneig NSE en directe de la pestanya de Vulnerabilitats
 │   ├── traceroute_tool.py        # Traçat de rutes
 │   ├── system_audit.py           # Auditoria de host local (psutil, ufw) i reforçament
 │   ├── vuln_correlator.py        # Correlació CVE (local + NVD API + NSE)
@@ -470,3 +473,27 @@ Les dades de l'auditoria s'envien a Google. Amb l'opció **Amaga les IP i els no
 (activada per defecte), SentinelX hi envia àlies («Equip 1», «la xarxa auditada») i torna a posar les
 dades reals a la resposta. Els textos de la IA s'han de revisar abans d'entregar-los al client: l'informe
 i les explicacions ho indiquen.
+
+## 11. Escaneig amb Nmap per modalitats
+
+La pestanya **Auditoria de Xarxa** i l'script `escaneig.py` (de Mouhammed Oualy, integrat a
+SentinelX) fan servir el mòdul `core/nmap_modes.py`, basat en la llibreria
+[python-nmap](https://pypi.org/project/python-nmap/):
+
+| Modalitat | Opcions de nmap | Abast |
+|-----------|-----------------|-------|
+| 1. Descobriment d'hosts actius | `-sn` | IP, rang o subxarxa |
+| 2. Ports oberts | `--open` | ports habituals, una llista o rang, o tots |
+| 3. Serveis i versions | `-sV --open` (i `-O`, `-sU` opcionals) | un port, un rang o tots els ports |
+| 4. Vulnerabilitats conegudes | `-sV --script vuln --open` | els serveis dels ports indicats |
+
+Els resultats passen a la sessió d'auditoria (Tauler, Informes i Expedients). A la modalitat 4,
+SentinelX hi afegeix les troballes «VULNERABLE» dels scripts NSE i els CVE que llista l'script
+`vulners` (els 20 de més puntuació per servei). `vulners` compara només el número de versió: en
+distribucions com Ubuntu, que corregeixen errors sense canviar-lo, cal verificar cada CVE.
+
+```bash
+venv/bin/python3 escaneig.py
+```
+
+Feu servir aquestes modalitats només sobre xarxes i equips que tingueu autorització per auditar.

@@ -249,7 +249,7 @@ if [[ -x "$VENV_PY" ]]; then
     else
         warn "No s'ha trobat 'requirements.txt' a ${SCRIPT_DIR}; s'instal·larà la llista bàsica de paquets."
         if run_logged "pip install (llista de reserva)" "$VENV_PY" -m pip install \
-            "customtkinter>=5.2.2" "psutil>=5.9.8" "requests>=2.31.0" "reportlab>=4.0.9" "shodan>=1.31.0" "pyinstaller>=6.3.0"; then
+            "customtkinter>=5.2.2" "psutil>=5.9.8" "requests>=2.31.0" "reportlab>=4.0.9" "shodan>=1.31.0" "python-nmap>=0.7.1" "pyinstaller>=6.3.0"; then
             ok "Dependències de Python instal·lades correctament (llista de reserva)."
             record "pip-requirements" "OK" "Font: llista de reserva (sense requirements.txt)"
         else

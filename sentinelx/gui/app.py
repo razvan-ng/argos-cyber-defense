@@ -98,10 +98,11 @@ class SentinelXApp(ctk.CTk):
         self.recon_tab = ReconTab(tab_recon, self.app_state, on_hosts_changed=self._on_hosts_changed)
         self.recon_tab.pack(fill="both", expand=True)
         OsintTab(tab_osint, self.app_state).pack(fill="both", expand=True)
-        self.network_tab = NetworkTab(tab_network, self.app_state)
+        self.network_tab = NetworkTab(tab_network, self.app_state, on_hosts_changed=self._on_hosts_changed)
         self.network_tab.pack(fill="both", expand=True)
         SystemTab(tab_system, self.app_state).pack(fill="both", expand=True)
-        VulnTab(tab_vuln, self.app_state).pack(fill="both", expand=True)
+        self.vuln_tab = VulnTab(tab_vuln, self.app_state)
+        self.vuln_tab.pack(fill="both", expand=True)
         self.report_tab = ReportTab(tab_report, self.app_state, switch_tab=self.switch_tab)
         self.report_tab.pack(fill="both", expand=True)
         AboutTab(tab_about).pack(fill="both", expand=True)
@@ -127,8 +128,9 @@ class SentinelXApp(ctk.CTk):
         self.dashboard_tab.refresh()
 
     def _on_hosts_changed(self):
-        """Quan el reconeixement passiu afegeix un equip, la resta de pestanyes el mostren."""
+        """Quan un escaneig o el reconeixement passiu afegeix equips, la resta de pestanyes els mostren."""
         self.network_tab.sync_with_session()
+        self.vuln_tab.sync_with_session()
         self.report_tab.set_target(self.app_state.session.target)
         self.dashboard_tab.refresh()
 

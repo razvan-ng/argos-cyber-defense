@@ -34,31 +34,42 @@ class AppState:
     def set_hosts(self, hosts):
         self.session.hosts = hosts
 
-    def merge_hosts(self, new_hosts):
-        """Combina els resultats d'un nou escaneig amb els equips ja coneguts.
+    def merge_scan(self, new_hosts):
+        """Combina un escaneig de ports amb la sessió port per port (core/nmap_modes.py).
 
-        Es fa servir quan l'escaneig de ports s'executa després d'un ping
-        sweep, per no perdre equips ja descoberts.
+        Un escaneig parcial (uns quants ports o una modalitat sense -sV) no esborra els serveis
+        dels altres ports ni el producte i la versió ja coneguts; les vulnerabilitats noves s'afegeixen
+        sense repetir les que ja hi eren.
         """
         existing = {h.ip: h for h in self.session.hosts}
         for new_host in new_hosts:
-            if new_host.ip in existing:
-                current = existing[new_host.ip]
-                current.services = new_host.services
-                if new_host.os_guess:
-                    current.os_guess = new_host.os_guess
-                if new_host.mac:
-                    current.mac = new_host.mac
-                if new_host.hostname:
-                    current.hostname = new_host.hostname
-            else:
+            current = existing.get(new_host.ip)
+            if current is None:
+                self.session.hosts.append(new_host)
                 existing[new_host.ip] = new_host
-        self.session.hosts = list(existing.values())
+                continue
+            for attr in ("hostname", "mac", "os_guess"):
+                if getattr(new_host, attr):
+                    setattr(current, attr, getattr(new_host, attr))
+            services = {(s.port, s.protocol): s for s in current.services}
+            for service in new_host.services:
+                old = services.get((service.port, service.protocol))
+                if old is None:
+                    current.services.append(service)
+                    continue
+                old.state = service.state
+                for attr in ("service_name", "product", "version"):
+                    if getattr(service, attr):
+                        setattr(old, attr, getattr(service, attr))
+                known = {(v.cve_id, v.description[:80]) for v in old.vulnerabilities}
+                old.vulnerabilities.extend(v for v in service.vulnerabilities
+                                           if (v.cve_id, v.description[:80]) not in known)
+            current.services.sort(key=lambda s: (s.port, s.protocol))
 
     def add_passive_host(self, new_host):
         """Afegeix a la sessió un equip conegut per reconeixement passiu (Shodan).
 
-        A diferència de merge_hosts, no substitueix els serveis que ja ha trobat un escaneig
+        A diferència de merge_scan, no substitueix els serveis que ja ha trobat un escaneig
         actiu: només hi afegeix els ports que encara no hi eren. Retorna quants n'ha afegit.
         """
         current = next((h for h in self.session.hosts if h.ip == new_host.ip), None)

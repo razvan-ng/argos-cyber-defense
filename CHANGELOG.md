@@ -9,6 +9,25 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.7.0] - 2026-11
+
+### Afegit
+- **Escaneig amb Nmap per modalitats** a la pestanya Auditoria de Xarxa, a partir de l'script
+  `escaneig.py` de Mouhammed Oualy (llibreria python-nmap):
+  1. Descobriment d'hosts actius (`-sn`).
+  2. Ports oberts d'un host o rang de hosts (`--open`).
+  3. Serveis i versions d'un port, un rang de ports o tots els ports (`-sV`).
+  4. Vulnerabilitats conegudes amb els scripts NSE de la categoria «vuln», incloent-hi els CVE que
+     llista l'script `vulners` per a cada versió (amb la puntuació CVSS i la gravetat).
+- Script de terminal `sentinelx/escaneig.py` amb el menú original de les quatre modalitats.
+- Nova dependència de Python: `python-nmap`.
+
+### Canviat
+- Els resultats d'un escaneig es combinen amb la sessió port per port: escanejar uns quants ports
+  ja no esborra els serveis ni les versions dels altres.
+- Es validen l'objectiu i els ports abans d'executar nmap (no s'hi poden colar opcions de nmap).
+- La modalitat 4, tots els ports i l'UDP demanen confirmació amb el Mode Segur activat.
+
 ## [2.6.0] - 2026-11
 
 ### Afegit
