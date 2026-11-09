@@ -168,6 +168,18 @@ def format_results(nm, mode):
     return lines
 
 
+def summary_lines(hosts):
+    """Resum de la modalitat 4: quantes troballes té cada servei i les tres de més puntuació."""
+    lines = ["--- RESUM DE VULNERABILITATS PER SERVEI ---"]
+    for host in hosts:
+        for service in host.services:
+            top = sorted(service.vulnerabilities, key=lambda v: -(v.cvss_score or 0))[:3]
+            detail = ", ".join(f"{v.cve_id} ({v.cvss_score})" if v.cvss_score else v.cve_id for v in top)
+            lines.append(f"{host.ip} {service.port}/{service.protocol} {service.product} {service.version}".rstrip()
+                         + f": {len(service.vulnerabilities)} troballa(es)" + (f"; les més greus: {detail}" if detail else ""))
+    return lines
+
+
 def _to_hosts(nm, mode):
     hosts, findings = [], []
     for ip in nm.all_hosts():

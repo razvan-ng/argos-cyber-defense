@@ -9,6 +9,12 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.7.1] - 2026-11
+
+### Canviat
+- L'script `escaneig.py` també mostra el resum de vulnerabilitats per servei al final de la
+  modalitat 4 (el mateix que la pestanya), perquè la llista de `vulners` és molt llarga.
+
 ## [2.7.0] - 2026-11
 
 ### Afegit

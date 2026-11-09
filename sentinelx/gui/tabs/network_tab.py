@@ -10,7 +10,9 @@ from tkinter import messagebox, ttk
 
 import customtkinter as ctk
 
-from core.nmap_modes import ALL_PORTS, MODES, NmapModeError, library_available, normalize_ports, scan, validate_target
+from core.nmap_modes import (
+    ALL_PORTS, MODES, NmapModeError, library_available, normalize_ports, scan, summary_lines, validate_target,
+)
 from core.traceroute_tool import TracerouteRunner
 from gui.theme import COLOR_ACCENT, COLOR_ACCENT_HOVER, COLOR_DANGER, COLOR_PRIMARY_DARK, COLOR_SUCCESS
 from gui.widgets.log_console import LogConsole
@@ -233,14 +235,8 @@ class NetworkTab(ctk.CTkFrame):
             self.log_console.log(line)
         hosts = result["hosts"]
         if mode == 4:  # resum: els CVE de més puntuació de cada servei
-            self.log_console.log("--- RESUM DE VULNERABILITATS PER SERVEI ---")
-            for host in hosts:
-                for service in host.services:
-                    top = sorted(service.vulnerabilities, key=lambda v: -(v.cvss_score or 0))[:3]
-                    detail = ", ".join(f"{v.cve_id} ({v.cvss_score})" if v.cvss_score else v.cve_id for v in top)
-                    self.log_console.log(f"{host.ip} {service.port}/{service.protocol} {service.product} "
-                                         f"{service.version}: {len(service.vulnerabilities)} troballa(es)"
-                                         + (f"; les més greus: {detail}" if detail else ""))
+            for line in summary_lines(hosts):
+                self.log_console.log(line)
         if mode == 1:
             self.app_state.set_hosts(hosts)  # el descobriment substitueix la llista d'equips
         else:

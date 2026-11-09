@@ -12,7 +12,7 @@ Feu-lo servir només sobre xarxes i equips que tingueu autorització per auditar
 """
 import sys
 
-from core.nmap_modes import INTRUSIVE_MODES, NmapModeError, normalize_ports, scan, validate_target
+from core.nmap_modes import INTRUSIVE_MODES, NmapModeError, normalize_ports, scan, summary_lines, validate_target
 
 
 def escaneig_nmap():
@@ -70,6 +70,10 @@ def escaneig_nmap():
         print(f"[*] Comanda: {resultat['command']}  ({resultat['elapsed']:.0f} s)\n")
         for linia in resultat["lines"]:
             print(linia)
+        if mode == 4:
+            print()
+            for linia in summary_lines(resultat["hosts"]):
+                print(linia)
 
 
 if __name__ == "__main__":
