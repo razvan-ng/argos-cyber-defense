@@ -1,7 +1,7 @@
 """Verificació HTTPS quan l'allotjament no envia la cadena de certificats completa.
 
-Alguns allotjaments (com l'allotjament gratuït d'InfinityFree) només envien el certificat del
-domini, sense el certificat intermedi de l'autoritat que l'ha emès. Els navegadors descarreguen
+Alguns servidors mal configurats només envien el certificat del domini, sense el certificat
+intermedi de l'autoritat que l'ha emès. Els navegadors descarreguen
 l'intermedi pel seu compte, però Python no, i la connexió falla amb l'error «unable to get local
 issuer certificate».
 

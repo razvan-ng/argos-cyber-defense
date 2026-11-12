@@ -2,7 +2,7 @@
 
 Flux de treball:
   1. L'administrador inicia la sessió amb el seu usuari de la web (connexió directa) o obre el
-     fitxer d'expedient descarregat del portal (mode fitxer, per a allotjaments com InfinityFree).
+     fitxer d'expedient descarregat del portal (mode fitxer, quan l'equip no pot connectar-hi).
   2. Obre l'expedient de l'empresa: si ja té auditories, la darrera es fa servir com a referència
      i la sessió nova és una reauditoria amb el mateix objectiu.
   3. Mentre es fan els escaneigs, els resultats es desen automàticament a l'expedient com a
@@ -83,7 +83,7 @@ class PortalTab(ctk.CTkFrame):
         file_row = ctk.CTkFrame(conn, fg_color="transparent")
         file_row.grid(row=3, column=0, columnspan=4, sticky="ew", padx=16, pady=(0, 12))
         ctk.CTkLabel(
-            file_row, text="Sense connexió directa (p. ex. allotjament InfinityFree): descarregueu el fitxer "
+            file_row, text="Sense connexió amb el portal (p. ex. en una xarxa sense Internet): descarregueu el fitxer "
             "de l'expedient des de la web i obriu-lo aquí.", text_color=COLOR_TEXT_MUTED, wraplength=600, justify="left",
         ).pack(side="left")
         ctk.CTkButton(file_row, text="Obre un fitxer d'expedient...", width=210, command=self._open_file).pack(side="right")

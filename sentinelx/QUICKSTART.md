@@ -62,7 +62,7 @@ amb l'anterior). SentinelX hi desa els resultats com a esborrany i, quan estigui
 **Publica per al client** els fa visibles a l'Àrea de clients de
 [argoscyberdefense.tech](https://argoscyberdefense.tech).
 
-Si el portal està en un allotjament que no permet la connexió directa (com InfinityFree), fes
+Si l'equip no pot connectar amb el portal (per exemple, en una xarxa sense Internet), fes
 servir **Obre un fitxer d'expedient** i **Exporta per al portal** (mode fitxer).
 
 ---

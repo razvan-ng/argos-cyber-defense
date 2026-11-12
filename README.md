@@ -25,7 +25,7 @@ Conté **SentinelX Audit Suite**, l'aplicació d'auditoria de seguretat desenvol
 Argos Cyber Defense (carpeta [`sentinelx/`](sentinelx/)).
 
 La web corporativa i l'**Àrea de clients** són a **[argoscyberdefense.tech](https://argoscyberdefense.tech)**,
-allotjades en un hosting amb PHP i MySQL. SentinelX hi desa els resultats de cada auditoria a
+allotjades en un servidor propi a Microsoft Azure (Apache, PHP i MariaDB) darrere de Cloudflare. SentinelX hi desa els resultats de cada auditoria a
 l'expedient del client perquè el client els consulti iniciant la sessió amb el seu compte.
 
 > Argos Cyber Defense, S.L. és una empresa fictícia creada amb finalitats acadèmiques.
@@ -95,8 +95,8 @@ SentinelX i la web d'Argos comparteixen els **expedients** de cada client:
 5. El client inicia la sessió a l'**Àrea de clients**, consulta l'informe, la comparació amb
    l'auditoria anterior i el descarrega en PDF, CSV o JSON.
 
-Si la web està en un allotjament que no permet la connexió de SentinelX (com l'allotjament
-gratuït d'InfinityFree), l'intercanvi es fa amb fitxers: la web descarrega l'expedient per a
+Si l'equip de l'auditor no pot connectar amb la web (per exemple, en una xarxa sense Internet),
+l'intercanvi es fa amb fitxers: la web descarrega l'expedient per a
 SentinelX i SentinelX n'exporta l'auditoria per pujar-la a la web.
 
 La comunicació directa es fa sempre per HTTPS amb sessions que caduquen; les auditories es desen

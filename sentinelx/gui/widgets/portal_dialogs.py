@@ -104,9 +104,11 @@ class LoginDialog(_PortalDialog):
         self._run(lambda: self.client.login(email, password, device, code), self._on_logged_in, self._on_error)
 
     def _on_logged_in(self, _result):
+        # El correu s'ha de llegir abans de tancar el diàleg: després els camps ja no existeixen
+        email = self.email_entry.get().strip()
         self._close()
         if self.on_success:
-            self.on_success(self.client, self.email_entry.get().strip())
+            self.on_success(self.client, email)
 
     def _on_error(self, exc):
         self.login_btn.configure(state="normal", text="Inicia la sessió")

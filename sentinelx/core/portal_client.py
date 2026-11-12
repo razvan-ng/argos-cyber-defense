@@ -14,9 +14,9 @@ Punts de l'API (tots retornen JSON amb el camp "ok"):
   GET    /api/v1/informes.php     auditories (i dades completes d'una auditoria)
   POST   /api/v1/informes.php     desa una auditoria (nova o actualització d'un esborrany)
 
-Alguns allotjaments gratuïts (com InfinityFree) bloquegen totes les peticions que no fa un
-navegador. En aquest cas es llança PortalBlockedError i SentinelX passa al mode fitxer
-(core/expedient_io.py).
+Si alguna cosa entre SentinelX i el portal (un servidor intermediari, un tallafocs o una
+verificació antirobots) retorna una pàgina en lloc de la resposta de l'API, es llança
+PortalBlockedError i es pot fer servir el mode fitxer (core/expedient_io.py).
 """
 import base64
 import json
@@ -32,8 +32,9 @@ API_PREFIX = "/api/v1"
 DEFAULT_TIMEOUT = 60
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
 
-# Senyals de les pàgines de verificació que alguns allotjaments retornen en lloc de l'API
-BLOCK_MARKERS = ("aes.js", "slowaes", "this site requires javascript", "__test=", "checking your browser")
+# Senyals de les pàgines de verificació antirobots (Cloudflare i similars) que poden arribar en lloc de l'API
+BLOCK_MARKERS = ("this site requires javascript", "checking your browser", "cf-chl", "challenge-platform",
+                 "just a moment...", "attention required!")
 
 
 class PortalError(Exception):
@@ -49,7 +50,7 @@ class PortalAuthError(PortalError):
 
 
 class PortalBlockedError(PortalError):
-    """L'allotjament del portal no deixa connectar aplicacions (només navegadors)."""
+    """Una verificació antirobots o un servidor intermediari ha retornat una pàgina en lloc de l'API."""
 
 
 # ------------------------------------------------------------------ #
@@ -160,9 +161,10 @@ class PortalClient:
             body = (response.text or "")[:4000].lower()
             if any(marker in body for marker in BLOCK_MARKERS):
                 raise PortalBlockedError(
-                    "L'allotjament del portal bloqueja les connexions que no venen d'un navegador "
-                    "(per exemple, l'allotjament gratuït d'InfinityFree). Feu servir el mode fitxer: "
-                    "descarregueu l'expedient des de la web i, en acabar, exporteu l'auditoria i pugeu-la al portal."
+                    "La connexió amb el portal s'ha aturat en una verificació antirobots o en un servidor "
+                    "intermediari de la xarxa. Torneu-ho a provar d'aquí a una estona o des d'una altra xarxa, "
+                    "o feu servir el mode fitxer: descarregueu l'expedient des de la web i, en acabar, exporteu "
+                    "l'auditoria i pugeu-la al portal."
                 ) from exc
             raise PortalError(
                 f"Resposta inesperada del servidor (HTTP {response.status_code}). "

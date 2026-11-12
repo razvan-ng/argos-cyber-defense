@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Recull les notícies de ciberseguretat per a la web d'Argos Cyber Defense.
 
-L'allotjament gratuït de la web (InfinityFree) no pot connectar amb les fonts externes, així que
-aquest script s'executa a GitHub Actions cada 3 hores i publica el resultat en un fitxer JSON a la
-branca `noticies`. La web el llegeix des del servidor o, si no pot, des del navegador.
+Aquest script s'executa a GitHub Actions cada 3 hores i publica el resultat en un fitxer JSON a la
+branca `noticies`. La web el fa servir com a còpia de les fonts externes: el llegeix des del servidor
+o, si no pot, des del navegador.
 
 Ús: python3 noticies.py fitxer_sortida.json
 """

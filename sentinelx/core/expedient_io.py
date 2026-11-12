@@ -1,6 +1,6 @@
 """Mode fitxer: intercanvi d'expedients amb el portal sense connexió directa.
 
-S'utilitza quan l'allotjament del portal no deixa connectar aplicacions (p. ex. InfinityFree):
+S'utilitza quan l'equip de l'auditor no pot connectar amb el portal (p. ex. una xarxa sense Internet):
   1. Al portal, «Fitxer per a SentinelX» descarrega l'expedient amb la darrera auditoria
      (format "argos-expedient").
   2. SentinelX l'obre, en fa servir l'auditoria com a referència i permet fer-ne la reauditoria.

@@ -9,6 +9,19 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.7.3] - 2026-11
+
+### Corregit
+- **No es podia iniciar la sessió al portal des de la pestanya Expedients**: el portal acceptava
+  l'usuari, però el diàleg es tancava abans de llegir el correu i la sessió no arribava a desar-se.
+  Ara, després d'iniciar la sessió, es carreguen les empreses i els expedients.
+
+### Canviat
+- La web ja no és a InfinityFree sinó en un servidor propi a Azure darrere de Cloudflare, de manera
+  que SentinelX s'hi connecta directament. El mode fitxer queda per als equips que no poden connectar
+  amb el portal, i s'han tret les referències a l'allotjament antic.
+- La detecció de pàgines de verificació antirobots reconeix les de Cloudflare.
+
 ## [2.7.2] - 2026-11
 
 ### Corregit
@@ -182,7 +195,7 @@ Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coi
 
 ### Corregit
 - La connexió amb el portal fallava amb l'error «unable to get local issuer certificate» quan
-  l'allotjament (com InfinityFree) envia el certificat SSL sense el certificat intermedi.
+  el servidor envia el certificat SSL sense el certificat intermedi.
   SentinelX porta ara els certificats intermedis públics de Let's Encrypt
   (`sentinelx/data/certs`) i completa la cadena pel seu compte. La verificació HTTPS continua
   activa: la cadena ha d'acabar en una arrel de confiança i el certificat ha de ser del domini.
@@ -200,7 +213,7 @@ Integració completa amb la web i l'Àrea de clients d'Argos Cyber Defense.
   referència i la comparació mostra les vulnerabilitats resoltes, noves, pendents i no verificades.
 - **Desament automàtic** dels resultats a l'expedient (esborrany que s'actualitza cada minut si hi
   ha canvis) i publicació per al client amb l'informe PDF.
-- **Mode fitxer** per a allotjaments que no permeten la connexió directa (InfinityFree): obrir el
+- **Mode fitxer** per quan no es pot connectar directament amb el portal: obrir el
   fitxer d'expedient descarregat de la web i exportar l'auditoria per pujar-la.
 - Detecció dels allotjaments que bloquegen les aplicacions, amb un missatge clar.
 - Avís de **versions noves** publicades a GitHub (a l'inici i a la pestanya Quant a).

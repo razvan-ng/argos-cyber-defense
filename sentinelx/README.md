@@ -61,8 +61,8 @@ realitzar auditories tècniques completes:
 7. **Expedients i portal de clients** — inici de sessió amb l'usuari administrador de la web,
    expedients de cada client, **reauditories** comparades amb l'auditoria anterior (resoltes,
    noves i pendents), desament automàtic a l'expedient i publicació a l'Àrea de clients de
-   [argoscyberdefense.tech](https://argoscyberdefense.tech). Inclou un mode fitxer per a allotjaments
-   que no permeten la connexió directa (vegeu l'apartat 7).
+   [argoscyberdefense.tech](https://argoscyberdefense.tech). Inclou un mode fitxer per quan l'equip
+   no pot connectar amb el portal (vegeu l'apartat 7).
 8. **Actualitzacions** — avisa quan hi ha una versió nova publicada a GitHub.
 
 Totes les operacions pesades s'executen en fils independents (threading) perquè la interfície
@@ -182,7 +182,7 @@ sentinelx/
 │   ├── argos_api.py              # Client de l'API d'Argos (Gemini i Shodan sense clau de l'usuari)
 │   ├── report_generator.py       # Generació d'informes HTML/PDF/JSON/CSV
 │   ├── portal_client.py          # Connexió amb el portal (sessió, expedients, auditories)
-│   ├── tls.py                    # Completa la cadena de certificats si el hosting no l'envia
+│   ├── tls.py                    # Completa la cadena de certificats si el servidor no l'envia
 │   ├── expedient_io.py           # Mode fitxer: expedients i auditories sense connexió directa
 │   ├── updates.py                # Comprovació de versions noves a GitHub
 │   └── session_io.py             # Desar/carregar sessions i comparació amb baseline
@@ -298,10 +298,10 @@ consultar a l'**Àrea de clients** de la web.
 6. **Publica per al client** publica l'auditoria (amb l'informe PDF) a l'Àrea de clients. També es
    pot revisar i publicar des del panell d'administració de la web.
 
-### Mode fitxer (allotjaments que no permeten la connexió, com InfinityFree)
+### Mode fitxer (sense connexió amb el portal)
 
-L'allotjament gratuït d'InfinityFree bloqueja totes les connexions que no fa un navegador, de
-manera que SentinelX no s'hi pot connectar directament. En aquest cas:
+Si l'equip de l'auditor no pot connectar amb el portal (per exemple, perquè audita una xarxa
+sense Internet o la xarxa bloqueja la connexió), els expedients s'intercanvien en fitxers:
 
 1. A la web, fitxa de l'expedient → **Fitxer per a SentinelX** (descarrega un `.json`).
 2. A SentinelX → **Obre un fitxer d'expedient**: es carrega la darrera auditoria com a referència.
@@ -346,8 +346,8 @@ no passen la primera capçalera a PHP). Les respostes són JSON amb el camp `ok`
 
 | Missatge | Causa i solució |
 |----------|-----------------|
-| *L'allotjament del portal bloqueja les connexions...* | El hosting (p. ex. InfinityFree) només deixa entrar navegadors. Feu servir el mode fitxer. |
-| *No s'ha pogut verificar el certificat HTTPS del portal...* | El certificat SSL de la web no està instal·lat o ha caducat, o la xarxa inspecciona el trànsit HTTPS (centres educatius, empreses). Si el hosting envia el certificat sense l'intermedi, SentinelX el completa sol (Let's Encrypt). |
+| *La connexió amb el portal s'ha aturat en una verificació antirobots...* | Un servidor intermediari o la protecció antirobots ha retornat una pàgina en lloc de l'API. Torneu-ho a provar més tard o des d'una altra xarxa, o feu servir el mode fitxer. |
+| *No s'ha pogut verificar el certificat HTTPS del portal...* | El certificat SSL de la web no està instal·lat o ha caducat, o la xarxa inspecciona el trànsit HTTPS (centres educatius, empreses). Si el servidor envia el certificat sense l'intermedi, SentinelX el completa sol (Let's Encrypt). |
 | *Massa intents fallits...* | Després de 3 intents fallits cal esperar 5 minuts (després 15 i 60). |
 | *Només els administradors poden iniciar la sessió a SentinelX* | L'usuari és un client. Feu servir un usuari administrador. |
 | *La sessió ha caducat* | Han passat 8 hores o un administrador ha tancat la sessió. Torneu a iniciar-la. |
