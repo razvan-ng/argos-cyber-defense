@@ -8,6 +8,7 @@ import platform
 import shutil
 
 from core.harvester import find_executable as find_theharvester
+from core.ssh_audit import find_command as find_ssh_audit
 
 REQUIRED_TOOLS = {
     "nmap": {
@@ -43,6 +44,11 @@ OPTIONAL_TOOLS = {
         "description": "Cerca OSINT de correus i subdominis (pestanya OSINT) — opcional; l'instal·la install_dependencies.sh",
         "apt_package": "theharvester",
         "locate": find_theharvester,  # també el troba dins de tools/, on el deixa l'instal·lador
+    },
+    "ssh-audit": {
+        "description": "Auditoria de servidors SSH (pestanya Auditoria SSH) — opcional; l'instal·la install_dependencies.sh",
+        "apt_package": "ssh-audit",
+        "locate": find_ssh_audit,  # mòdul de Python del venv o programa del sistema
     },
 }
 

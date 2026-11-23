@@ -107,6 +107,7 @@ def session_to_dict(session):
         "traceroute_hops": [_hop_to_dict(h) for h in session.traceroute_hops],
         "local_system_info": session.local_system_info,
         "hardening_findings": [_vulnerability_to_dict(v) for v in session.hardening_findings],
+        "ssh_audits": session.ssh_audits,
     }
 
 
@@ -117,6 +118,7 @@ def session_from_dict(data):
     session.traceroute_hops = [_hop_from_dict(h) for h in data.get("traceroute_hops", [])]
     session.local_system_info = data.get("local_system_info", {})
     session.hardening_findings = [_vulnerability_from_dict(v) for v in data.get("hardening_findings", [])]
+    session.ssh_audits = data.get("ssh_audits", [])
     return session
 
 

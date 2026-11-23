@@ -9,6 +9,19 @@ Les versions segueixen el format `MAJOR.MENOR.CORRECCIÓ`:
 Cada versió es publica a GitHub Releases amb l'etiqueta `vX.Y.Z`, que ha de coincidir amb el camp
 `version` de [`sentinelx/data/branding.json`](sentinelx/data/branding.json).
 
+## [2.8.0] - 2026-11
+
+### Afegit
+- **Auditoria SSH amb [ssh-audit](https://github.com/jtesta/ssh-audit)**: pestanya nova Auditoria SSH
+  i script de terminal `sentinelx/auditoria_ssh.py`, amb el mòdul comú `core/ssh_audit.py`.
+  - Mostra en forma d'arbre les claus d'host, els algorismes de xifratge, MAC i intercanvi de claus
+    (correctes, amb avisos o obsolets / insegurs), els mètodes d'autenticació que accepta el
+    servidor i les recomanacions d'ssh-audit.
+  - L'auditoria es desa a la sessió, als informes (secció Auditoria SSH a l'HTML i al PDF, i
+    `auditories_ssh` al JSON) i les troballes passen al servei SSH de l'equip.
+  - Si ssh-audit no hi és, la pestanya i l'script l'instal·len amb pip a l'entorn de SentinelX.
+- Nova dependència de Python: `ssh-audit`.
+
 ## [2.7.3] - 2026-11
 
 ### Corregit

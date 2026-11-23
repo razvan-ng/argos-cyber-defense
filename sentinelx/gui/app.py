@@ -16,6 +16,7 @@ from gui.tabs.osint_tab import OsintTab
 from gui.tabs.portal_tab import PortalTab
 from gui.tabs.recon_tab import ReconTab
 from gui.tabs.report_tab import ReportTab
+from gui.tabs.ssh_tab import SshTab
 from gui.tabs.system_tab import SystemTab
 from gui.tabs.vuln_tab import VulnTab
 from gui.theme import APP_NAME, APP_VERSION, COMPANY_NAME, apply_theme
@@ -28,6 +29,7 @@ TAB_DASHBOARD = "Tauler"
 TAB_PORTAL = "Expedients"
 TAB_RECON = "Reconeixement passiu"
 TAB_OSINT = "OSINT"
+TAB_SSH = "Auditoria SSH"
 
 
 class SentinelXApp(ctk.CTk):
@@ -86,6 +88,7 @@ class SentinelXApp(ctk.CTk):
         tab_recon = self.tabview.add(TAB_RECON)
         tab_osint = self.tabview.add(TAB_OSINT)
         tab_network = self.tabview.add("Auditoria de Xarxa")
+        tab_ssh = self.tabview.add(TAB_SSH)
         tab_system = self.tabview.add("Sistema Local")
         tab_vuln = self.tabview.add("Vulnerabilitats i CVE")
         tab_report = self.tabview.add("Informes")
@@ -100,6 +103,8 @@ class SentinelXApp(ctk.CTk):
         OsintTab(tab_osint, self.app_state).pack(fill="both", expand=True)
         self.network_tab = NetworkTab(tab_network, self.app_state, on_hosts_changed=self._on_hosts_changed)
         self.network_tab.pack(fill="both", expand=True)
+        self.ssh_tab = SshTab(tab_ssh, self.app_state, on_hosts_changed=self._on_hosts_changed)
+        self.ssh_tab.pack(fill="both", expand=True)
         SystemTab(tab_system, self.app_state).pack(fill="both", expand=True)
         self.vuln_tab = VulnTab(tab_vuln, self.app_state)
         self.vuln_tab.pack(fill="both", expand=True)
@@ -119,10 +124,13 @@ class SentinelXApp(ctk.CTk):
             self.dashboard_tab.refresh()
         elif current == TAB_PORTAL:
             self.portal_tab.refresh()
+        elif current == TAB_SSH:
+            self.ssh_tab.sync_with_session()  # p. ex. després de carregar una sessió a Informes
 
     def _on_expedient_changed(self):
         """Quan s'obre o es tanca un expedient, les altres pestanyes mostren la sessió nova."""
         self.network_tab.sync_with_session()
+        self.ssh_tab.sync_with_session()
         self.recon_tab.sync_with_session()
         self.report_tab.set_target(self.app_state.session.target)
         self.dashboard_tab.refresh()

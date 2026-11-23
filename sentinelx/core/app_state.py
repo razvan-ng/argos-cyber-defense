@@ -112,6 +112,34 @@ class AppState:
             host.services.append(service)
         service.vulnerabilities.append(vulnerability)
 
+    def add_ssh_audit(self, audit):
+        """Desa una auditoria SSH (core/ssh_audit.py) i n'afegeix les troballes al servei SSH de l'equip.
+
+        Si el mateix servidor ja s'havia auditat, l'auditoria nova substitueix l'anterior i les seves
+        troballes, perquè els informes reflecteixin la configuració actual.
+        """
+        from core.ssh_audit import findings
+
+        previous = next((a for a in self.session.ssh_audits if a["objectiu"] == audit["objectiu"]), None)
+        host = next((h for h in self.session.hosts if h.ip == audit["ip"]), None)
+        if host is None:
+            host = HostResult(ip=audit["ip"], hostname=audit["host"] if audit["host"] != audit["ip"] else "")
+            self.session.hosts.append(host)
+        service = next((s for s in host.services if s.port == audit["port"] and s.protocol == "tcp"), None)
+        if service is None:
+            service = ServiceInfo(port=audit["port"], protocol="tcp", service_name="ssh")
+            host.services.append(service)
+            host.services.sort(key=lambda s: (s.port, s.protocol))
+        software = audit["servidor"]["programari"]
+        if software and not service.product:
+            service.product, _, service.version = software.partition("_")
+        if previous is not None:
+            self.session.ssh_audits.remove(previous)
+            old = {(v.cve_id, v.description) for v in findings(previous)}
+            service.vulnerabilities = [v for v in service.vulnerabilities if (v.cve_id, v.description) not in old]
+        service.vulnerabilities.extend(findings(audit))
+        self.session.ssh_audits.append(audit)
+
     def load_session(self, session):
         self.session = session
 
@@ -141,7 +169,7 @@ class AppState:
         self.portal_draft_id = None
 
     def has_results(self):
-        return bool(self.session.hosts or self.session.hardening_findings)
+        return bool(self.session.hosts or self.session.hardening_findings or self.session.ssh_audits)
 
     def dashboard_stats(self):
         """Calcula les estadístiques agregades per al Tauler (Dashboard)."""

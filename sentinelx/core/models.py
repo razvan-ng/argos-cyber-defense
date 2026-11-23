@@ -60,3 +60,4 @@ class AuditSession:
     traceroute_hops: List[TracerouteHop] = field(default_factory=list)
     local_system_info: dict = field(default_factory=dict)
     hardening_findings: List[Vulnerability] = field(default_factory=list)
+    ssh_audits: List[dict] = field(default_factory=list)  # auditories SSH (core/ssh_audit.py)

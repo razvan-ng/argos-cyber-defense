@@ -6,6 +6,7 @@ El PDF es genera directament amb ReportLab (sense dependències de sistema
 com Cairo/Pango), la qual cosa simplifica molt l'empaquetat amb PyInstaller.
 """
 import datetime
+from html import escape as html_escape
 
 from core.models import Severity
 from core.shodan_intel import SHODAN_STATE
@@ -101,6 +102,16 @@ class ReportGenerator:
         hardening_rows = "".join(self._html_hardening_row(v) for v in hardening_sorted) or (
             '<tr><td colspan="3">No s\'ha executat cap auditoria de reforçament del sistema local.</td></tr>'
         )
+        ssh_section = "".join(
+            f"<h3>{a['objectiu']} | {html_escape(a['servidor']['banner'])}</h3>"
+            "<table><tr><th>Secció</th><th>Element</th><th>Estat</th><th>Detall</th></tr>"
+            + "".join(f"<tr><td>{section}</td><td>{html_escape(name)}</td><td>{state}</td><td>{html_escape(detail)}</td></tr>"
+                      for section, name, state, detail in self._ssh_rows(a))
+            + "</table>"
+            for a in self.session.ssh_audits
+        )
+        if ssh_section:
+            ssh_section = f"<section><h2>Auditoria SSH (ssh-audit)</h2>{ssh_section}</section>"
 
         html = f"""<!DOCTYPE html>
 <html lang="ca">
@@ -164,6 +175,7 @@ class ReportGenerator:
             {hardening_rows}
         </table>
     </section>
+    {ssh_section}
     <section>
         <h2>Pla de Millora</h2>
         <p>Es recomana prioritzar la mitigació de les troballes classificades com a <strong>Crítica</strong> i
@@ -298,6 +310,19 @@ class ReportGenerator:
             hardening_data.append(["-", "No s'ha executat cap auditoria de reforçament del sistema local.", "-"])
         story.append(self._styled_table(hardening_data, [22 * mm, 74 * mm, 74 * mm]))
         story.append(Spacer(1, 16))
+
+        if self.session.ssh_audits:
+            story.append(Paragraph("Auditoria SSH (ssh-audit)", heading_style))
+            cell_style = ParagraphStyle("SshCell", parent=normal_style, fontSize=7, leading=9)
+            for audit in self.session.ssh_audits:
+                story.append(Paragraph(f"{audit['objectiu']} | {html_escape(audit['servidor']['banner'])}", normal_style))
+                ssh_data = [["Secció", "Element", "Estat", "Detall"]]
+                ssh_data += [[section, Paragraph(html_escape(name), cell_style), state,
+                              Paragraph(html_escape(detail[:200]), cell_style)]
+                             for section, name, state, detail in self._ssh_rows(audit)]
+                story.append(self._styled_table(ssh_data, [38 * mm, 52 * mm, 25 * mm, 55 * mm]))
+                story.append(Spacer(1, 10))
+            story.append(Spacer(1, 6))
 
         story.append(Paragraph("Pla de Millora", heading_style))
         for item in IMPROVEMENT_PLAN:
@@ -475,9 +500,25 @@ class ReportGenerator:
                 {"salt": hop.hop_number, "ip": hop.ip, "hostname": hop.hostname, "rtt_ms": hop.rtt_ms}
                 for hop in self.session.traceroute_hops
             ],
+            "auditories_ssh": self.session.ssh_audits,
             "pla_millora": list(IMPROVEMENT_PLAN),
             "total_troballes": len(findings) + len(self.session.hardening_findings),
         }
+
+    @staticmethod
+    def _ssh_rows(audit):
+        """Files (secció, element, estat, detall) d'una auditoria SSH per a les taules dels informes."""
+        from core.ssh_audit import STATE_LABELS
+
+        rows = [("Servidor", f"Protocol SSH-{audit['servidor']['protocol']}",
+                 STATE_LABELS[audit['servidor']['estat_protocol']], audit['servidor']['programari'])]
+        for category in audit["categories"]:
+            rows += [(category["nom"], i["nom"], STATE_LABELS[i["estat"]], i["detall"]) for i in category["elements"]]
+        auth = audit["autenticacio"]
+        rows += [("Autenticació", m["nom"], STATE_LABELS[m["estat"]], m["detall"]) for m in auth["metodes"]]
+        if auth["error"]:
+            rows.append(("Autenticació", "-", "-", auth["error"]))
+        return rows
 
     @staticmethod
     def _vulnerability_data(v):

@@ -40,7 +40,8 @@ realitzar auditories tècniques completes:
    conegudes amb els scripts NSE (`--script vuln`, inclòs `vulners`), amb control sobre l'abast de l'escaneig
    (ports habituals, tots els ports `-p-`, ports personalitzats, i escaneig UDP `-sU`), i traçat
    de rutes (`traceroute`/`tracepath`). Doble clic sobre un equip detectat copia la seva IP al
-   camp d'objectiu.
+   camp d'objectiu. La pestanya **Auditoria SSH** analitza la configuració d'un servidor SSH amb
+   `ssh-audit` (vegeu l'apartat 12).
 3. **Auditoria de Sistema Local** — interfícies, connexions actives, processos, usuaris i estat
    del tallafocs (`ufw`), mitjançant `psutil`; i una pestanya de **Reforçament (Hardening)** que
    detecta actualitzacions pendents, binaris amb bit SUID/SGID, comptes addicionals amb
@@ -158,6 +159,7 @@ sentinelx/
 ├── main.py                     # Punt d'entrada
 ├── shodan_recon.py             # Reconeixement passiu des del terminal (Shodan i The Harvester)
 ├── escaneig.py                 # Escaneig amb Nmap per modalitats des del terminal
+├── auditoria_ssh.py            # Auditoria SSH amb ssh-audit des del terminal
 ├── requirements.txt
 ├── install_dependencies.sh     # Instal·lador automàtic (Ubuntu 24.04/26.04)
 ├── QUICKSTART.md                # Guia d'inici ràpid (5-6 passos)
@@ -171,6 +173,7 @@ sentinelx/
 │   ├── branding.py                # Càrrega de la configuració de marca (data/branding.json)
 │   ├── dependency_check.py       # Health check d'eines externes
 │   ├── nmap_modes.py             # Escaneig amb Nmap per modalitats (python-nmap)
+│   ├── ssh_audit.py              # Auditoria de servidors SSH (ssh-audit)
 │   ├── network_scanner.py        # Escaneig NSE en directe de la pestanya de Vulnerabilitats
 │   ├── traceroute_tool.py        # Traçat de rutes
 │   ├── system_audit.py           # Auditoria de host local (psutil, ufw) i reforçament
@@ -497,3 +500,32 @@ venv/bin/python3 escaneig.py
 ```
 
 Feu servir aquestes modalitats només sobre xarxes i equips que tingueu autorització per auditar.
+
+## 12. Auditoria SSH amb ssh-audit
+
+La pestanya **Auditoria SSH** i l'script `auditoria_ssh.py` fan servir el mòdul `core/ssh_audit.py`,
+que executa [ssh-audit](https://github.com/jtesta/ssh-audit) en format JSON contra el servidor.
+`install_dependencies.sh` l'instal·la a l'entorn virtual; si hi falta, la pestanya i l'script
+l'instal·len amb pip.
+
+Per a cada servidor es mostra en forma d'arbre:
+
+- el banner i la versió del protocol;
+- les claus d'host (mida i empremta SHA256), els algorismes de xifratge, MAC i intercanvi de claus,
+  marcats com a correctes, amb avisos o obsolets / insegurs segons ssh-audit;
+- els mètodes d'autenticació que accepta el servidor (ssh-audit no els comprova: SentinelX els
+  demana amb el client `ssh` sense provar cap credencial); la contrasenya i el mode interactiu
+  es marquen com a avís;
+- les recomanacions d'ssh-audit.
+
+L'auditoria es desa a la sessió (i als fitxers de sessió, a l'informe JSON i a la secció «Auditoria
+SSH» dels informes HTML i PDF), i les troballes s'afegeixen al servei SSH de l'equip (Tauler,
+Informes i Expedients). L'script desa les auditories a `auditories_ssh.json`, dins la carpeta de
+configuració de SentinelX, que es pot obrir a Informes amb «Carregar Sessió».
+
+```bash
+venv/bin/python3 auditoria_ssh.py
+```
+
+ssh-audit obre diverses connexions al servidor (també mesura si limita les connexions): feu-lo
+servir només sobre servidors que tingueu autorització per auditar.
